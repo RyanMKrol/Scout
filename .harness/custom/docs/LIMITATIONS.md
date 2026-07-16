@@ -26,3 +26,15 @@ Each row: what it is, *why* it was chosen, its **impact**, and *when to revisit*
 - **Why:** SwiftUI correctness (visual polish, interaction feel) can pass every automated check while still looking or feeling wrong.
 - **Impact:** A screenshot catches gross visual breakage but not subtle UX issues; expect to review UI-heavy tasks by hand.
 - **Revisit:** If UI regressions slip through, add snapshot tests or tighten which tasks require human review.
+
+### 2026-07-16 — Adopted pattern: all live-radio I/O sits behind a protocol seam
+- **What:** The throughput/radio I/O (`NetworkConnection` over `.cellular`, `CoreTelephony`) is reached only through protocols (`ThroughputSampler` / `RadioInfoProviding`); a scripted fake implements them for all tests, live impls run only on-device.
+- **Why:** CI/Simulator has no cellular radio, so this is the only way the loop can build and test measurement-dependent code. Mirrors how a sibling harness (`enough`) stubbed StoreKit "behind the same protocol the real impl will implement." Seam + a large pure-logic core (windowing, 5G/LTE tagging) keeps everything unit-testable from a deterministic sample stream.
+- **Impact:** The end-to-end "does a real transfer actually move over cellular" behaviour is NEVER verified by the loop — only on-device by a human. Every measurement task tests the pure math, not a live transfer. Enforced via `custom/build-preamble.md` + restated in each measurement spec.
+- **Revisit:** If an on-device CI runner / hardware-in-the-loop rig ever becomes available.
+
+### 2026-07-16 — Animated readout is verified by recorded video, not a single screenshot
+- **What:** Scout's headline UI updates ~4×/sec; a still frame can't prove a value ticks or a graph scrolls. Timing/motion claims are verified from frames of `simctl io … recordVideo`.
+- **Why:** A single screenshot under-verifies animation, and the alternative (driving the real host cursor to "watch" it live) is unacceptable — a sibling harness (`basket`) hit exactly that and its loop took over the operator's real mouse before the video approach was codified.
+- **Impact:** Visual tasks with a motion claim must produce a short video; a claim with no capture is a FAIL. Guidance lives in `custom/visual-verify-build.md` / `visual-verify-audit.md`.
+- **Revisit:** If a lighter frame-diffing / snapshot approach proves sufficient for the trend graph.

@@ -1,0 +1,33 @@
+# Picks the simulator the Test job runs on. Preference-ordered rather than first-available:
+# device class changes layout and hit-testing, so runs should land on the same model whenever
+# the runner image has it — but a missing model must NOT fail the build (a pinned name hard-fails
+# the merge gate the day the runner image drops that device), hence the any-iPhone fallback.
+name: Resolve iPhone simulator
+description: Resolve a preferred (or any) available iPhone simulator name
+outputs:
+  name:
+    description: The resolved simulator device name
+    value: ${{ steps.resolve.outputs.name }}
+runs:
+  using: composite
+  steps:
+    - id: resolve
+      shell: bash
+      run: |
+        available=$(xcrun simctl list devices available)
+        name=""
+        for p in "iPhone 17 Pro" "iPhone 17" "iPhone 16 Pro" "iPhone 16"; do
+          if echo "$available" | grep -qF "$p ("; then name="$p"; break; fi
+        done
+        if [ -z "$name" ]; then
+          name=$(echo "$available" \
+            | awk -F'[()]' '/iPhone/{print $1; exit}' \
+            | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+        fi
+        if [ -z "$name" ]; then
+          echo "No available iPhone simulator found on this runner." >&2
+          echo "$available" >&2
+          exit 1
+        fi
+        echo "Resolved simulator: $name"
+        echo "name=$name" >> "$GITHUB_OUTPUT"

@@ -1,3 +1,9 @@
+# XcodeGen output — the .xcodeproj is regenerated from project.yml, never committed.
+*.xcodeproj/
+
+# Visual-verification scratch (build_run.sh output)
+screenshots/
+
 # Xcode / Swift
 build/
 DerivedData/

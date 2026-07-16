@@ -17,32 +17,49 @@ concurrency:
 jobs:
   verify:
     name: Definition of Done
-    # iOS builds require a macOS runner with Xcode + iOS simulators. Scout targets iOS 26,
-    # which needs Xcode 26 — if the default runner image lags, pin a newer image (e.g.
-    # `macos-15`) or select an Xcode with `sudo xcode-select -s /Applications/Xcode_26.app`.
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show toolchain
-        run: |
-          xcodebuild -version
-          swift --version
+      # Scout targets iOS 26 — pin the newest Xcode 26 so the SDK/simulator runtime exists.
+      - name: Select Xcode 26
+        uses: ./.github/actions/select-xcode
 
-      # SwiftLint is preinstalled on GitHub macOS runners; SwiftFormat may not be.
-      # `brew install` is idempotent (no-op if already present).
-      - name: Install SwiftFormat + SwiftLint
-        run: brew install swiftformat swiftlint
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # The Scout.xcodeproj is generated, not committed — build it from project.yml.
+      - name: Generate Xcode project
+        run: xcodegen generate
 
       - name: Format check
-        run: swiftformat --lint .
+        run: |
+          brew install swiftformat
+          swiftformat --lint Sources Tests
 
       - name: Lint
-        run: swiftlint --strict
+        run: |
+          brew install swiftlint
+          swiftlint --strict
+
+      - name: Resolve an available iPhone simulator
+        id: sim
+        uses: ./.github/actions/resolve-simulator
 
       - name: Test
-        run: >-
-          xcodebuild test
-          -scheme Scout
-          -destination 'platform=iOS Simulator,name=iPhone 16'
-          CODE_SIGNING_ALLOWED=NO
+        run: |
+          xcodebuild test \
+            -project Scout.xcodeproj -scheme Scout \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO
+
+      # Without this an unattended loop's CI failure leaves nothing to diagnose once the
+      # ephemeral runner is gone — the failure logs / screenshots live inside the bundle.
+      - name: Upload result bundle on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults.xcresult
+          retention-days: 14

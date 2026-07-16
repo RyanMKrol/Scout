@@ -4,7 +4,7 @@
   "tasks": [
     {
       "id": "T001",
-      "title": "Xcode project scaffold + SwiftFormat/SwiftLint + CI green on an empty build",
+      "title": "XcodeGen project scaffold + SwiftFormat/SwiftLint + CI green on an empty build",
       "status": "pending",
       "dependsOn": [],
       "gate": "needs-human",

@@ -146,7 +146,7 @@ work lands. See [`.harness/docs/HARNESS.md`](./.harness/docs/HARNESS.md) for how
 
 | Task | Description | Status |
 |------|-------------|--------|
-| T001 | Xcode project scaffold + SwiftFormat/SwiftLint + CI green on an empty build | 🔒 needs-human — pending |
+| T001 | XcodeGen project scaffold + SwiftFormat/SwiftLint + CI green on an empty build | 🔒 needs-human — pending |
 
 _Grow the backlog with `/implementation-harness-add-to-backlog`._
 

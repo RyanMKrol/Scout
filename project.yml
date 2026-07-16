@@ -1,0 +1,60 @@
+name: Scout
+# XcodeGen spec — the Scout.xcodeproj is GENERATED from this file (run `xcodegen generate`),
+# never hand-edited. Add new files under Sources/ (or Tests/) and they're picked up
+# automatically on the next generate — this is what lets the autonomous loop grow the codebase
+# without opening Xcode. Edit THIS file for anything project-level; never edit the .xcodeproj.
+options:
+  bundleIdPrefix: com.ryankrol
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  Scout:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: Scout
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        ITSAppUsesNonExemptEncryption: false
+        # Declaring a launch screen is REQUIRED for iOS to render the app at the device's
+        # native full resolution. Without it, iOS runs the app in legacy compatibility mode —
+        # scaled up inside black letterbox bars (the "iPhone 4 / oversized" look). An empty
+        # dict is the documented minimum to opt into full-screen native rendering. (Learned
+        # from a sibling harness project that shipped every screen letterboxed until it added
+        # this — see .harness/custom/visual-verify-build.md's letterbox guard.)
+        UILaunchScreen: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.scout
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+  ScoutTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Tests
+    dependencies:
+      - target: Scout
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.scout.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+schemes:
+  Scout:
+    build:
+      targets:
+        Scout: all
+        ScoutTests: [test]
+    test:
+      targets:
+        - ScoutTests
