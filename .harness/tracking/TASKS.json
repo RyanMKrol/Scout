@@ -837,6 +837,33 @@
       "verify": [],
       "expectsTest": true,
       "spec": ".harness/tasks/T033.md"
+    },
+    {
+      "id": "T034",
+      "title": "Dark-mode-only enforcement + dark launch screen",
+      "status": "pending",
+      "dependsOn": [
+        "T022",
+        "T028"
+      ],
+      "gate": null,
+      "tags": [
+        "design-fidelity"
+      ],
+      "facets": {
+        "layer": "build",
+        "workType": "config",
+        "risk": []
+      },
+      "scope": [
+        "project.yml",
+        "Sources/Assets.xcassets/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T034.md"
     }
   ]
 }

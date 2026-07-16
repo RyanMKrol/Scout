@@ -28,5 +28,7 @@
   bounded waits; never assert live UI state directly. Give the live-Mbps readout, the 5G/LTE badge,
   and the start/stop control stable accessibility identifiers so tests can assert state a screenshot
   can't show.
-- **Copy style:** no em dashes in any user-facing string.
+- **Copy style:** user-facing copy specified by the design handoff (`design/design_handoff_scout/`)
+  is FINAL — reproduce it character-for-character, including its em dashes. Only copy you invent
+  yourself (log messages, new strings no spec dictates) avoids em dashes.
 - **Docs lockstep:** a change that alters user-visible behaviour updates `README.md` in the same commit.
