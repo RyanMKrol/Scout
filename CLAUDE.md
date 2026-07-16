@@ -190,7 +190,7 @@ them, don't abandon the task:**
   edits to `project.yml`.
 - **Definition of Done (mirrored verbatim in `.github/workflows/ci.yml`, CI is the authoritative gate):**
   - **Generate:** `xcodegen generate` (first — the .xcodeproj is not committed).
-  - **Format:** `swiftformat --lint Sources Tests`
+  - **Format:** `swiftformat Sources Tests --lint`
   - **Lint:** `swiftlint --strict`
   - **Test + Build:** `xcodebuild test -project Scout.xcodeproj -scheme Scout -destination '…' CODE_SIGNING_ALLOWED=NO` — `xcodebuild test` compiles first, so the build step is folded in. Simulator builds need **no code signing**. CI resolves the simulator name dynamically (`.github/actions/resolve-simulator`) so a runner dropping a model doesn't hard-fail the gate.
 - **Local runs pin a DEDICATED simulator by UDID, not by name.** Create one Scout-only sim once
