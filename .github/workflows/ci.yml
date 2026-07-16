@@ -1,0 +1,48 @@
+name: CI
+# ▲ The loop gates on a workflow whose `name:` matches CI_WORKFLOW (default "CI").
+#   If you rename this, set CI_WORKFLOW to match in .harness/config/harness.env.
+
+# Run on every push (so the loop's per-task branches get a run to watch) and on PRs
+# to main. The loop merges a branch into `main` ONLY when this workflow goes green.
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes (macOS minutes bill ~10×).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Definition of Done
+    # iOS builds require a macOS runner with Xcode + iOS simulators. Scout targets iOS 26,
+    # which needs Xcode 26 — if the default runner image lags, pin a newer image (e.g.
+    # `macos-15`) or select an Xcode with `sudo xcode-select -s /Applications/Xcode_26.app`.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      # SwiftLint is preinstalled on GitHub macOS runners; SwiftFormat may not be.
+      # `brew install` is idempotent (no-op if already present).
+      - name: Install SwiftFormat + SwiftLint
+        run: brew install swiftformat swiftlint
+
+      - name: Format check
+        run: swiftformat --lint .
+
+      - name: Lint
+        run: swiftlint --strict
+
+      - name: Test
+        run: >-
+          xcodebuild test
+          -scheme Scout
+          -destination 'platform=iOS Simulator,name=iPhone 16'
+          CODE_SIGNING_ALLOWED=NO

@@ -137,6 +137,21 @@ yet.
 
 ---
 
+## Build status
+
+This repo is built by the autonomous implementation harness (`.harness/`) — one fully-verified task at a
+time, gated on green CI. The table reflects the current backlog in
+[`.harness/tracking/TASKS.json`](./.harness/tracking/TASKS.json); the loop keeps task status in lockstep as
+work lands. See [`.harness/docs/HARNESS.md`](./.harness/docs/HARNESS.md) for how it works.
+
+| Task | Description | Status |
+|------|-------------|--------|
+| T001 | Xcode project scaffold + SwiftFormat/SwiftLint + CI green on an empty build | 🔒 needs-human — pending |
+
+_Grow the backlog with `/implementation-harness-add-to-backlog`._
+
+---
+
 ## Why "Scout"
 
 You *scout* the room for signal — sweep the phone around, hunt for the good spot, plant
