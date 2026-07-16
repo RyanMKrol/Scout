@@ -5,7 +5,7 @@
     {
       "id": "T001",
       "title": "XcodeGen project scaffold + SwiftFormat/SwiftLint + CI green on an empty build",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": "needs-human",
       "tags": [
