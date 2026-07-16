@@ -189,9 +189,12 @@ them, don't abandon the task:**
   codebase without opening Xcode. Project-level changes (settings, Info.plist keys, new targets) are
   edits to `project.yml`.
 - **Definition of Done (mirrored verbatim in `.github/workflows/ci.yml`, CI is the authoritative gate):**
-  - **Generate:** `xcodegen generate` (first — the .xcodeproj is not committed).
-  - **Format:** `swiftformat Sources Tests --lint`
-  - **Lint:** `swiftlint --strict`
+  - **Tools:** `./tools/ensure-dod-tools.sh` (first — fetches the VERSION-PINNED, checksum-verified
+    SwiftFormat/SwiftLint into the git-ignored `tools/bin/`, so local and CI run byte-identical
+    formatters; bump versions only in that script, deliberately).
+  - **Generate:** `xcodegen generate` (the .xcodeproj is not committed).
+  - **Format:** `./tools/bin/swiftformat Sources Tests --lint`
+  - **Lint:** `./tools/bin/swiftlint --strict`
   - **Test + Build:** `xcodebuild test -project Scout.xcodeproj -scheme Scout -destination '…' CODE_SIGNING_ALLOWED=NO` — `xcodebuild test` compiles first, so the build step is folded in. Simulator builds need **no code signing**. CI resolves the simulator name dynamically (`.github/actions/resolve-simulator`) so a runner dropping a model doesn't hard-fail the gate.
 - **Local runs target a DEDICATED, uniquely-named simulator — `Scout-Sim` — never a generic model
   name.** `tools/loop_sim.sh` idempotently ensures it exists (reuses it, else creates it on the newest

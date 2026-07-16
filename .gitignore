@@ -6,6 +6,9 @@ Sources/Info.plist
 # Visual-verification scratch (build_run.sh output)
 screenshots/
 
+# Pinned DoD tool binaries (fetched by tools/ensure-dod-tools.sh — never committed)
+tools/bin/
+
 # Xcode / Swift
 build/
 DerivedData/

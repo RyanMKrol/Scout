@@ -63,6 +63,12 @@ Each row: what it is, *why* it was chosen, its **impact**, and *when to revisit*
 - **Impact:** Cloudflare throttling/blocking/changing the endpoint breaks measurement; readings also include Cloudflare's own edge performance, not just the radio link (minor at a 10 Mbps cap). Endpoint is one constant (`HTTPProbeRequest.host`) so it's swappable.
 - **Revisit:** The self-hosted endpoint idea in IDEAS.jsonl (planned "later" in the README).
 
+### 2026-07-16 — SwiftFormat/SwiftLint are version-pinned; staying current is a manual chore
+- **What:** The DoD's format/lint tools are exact-version, checksum-verified binaries fetched by `tools/ensure-dod-tools.sh` (SwiftFormat 0.61.1, SwiftLint 0.65.0) — CI no longer brew-installs "latest".
+- **Why:** Determinism for the unattended loop: a surprise formatter release changing behavior/CLI reds CI with failures unrelated to any diff and confuses escalation (live precedent: SwiftFormat 0.61's CLI parsing change, 2026-07-16).
+- **Impact:** Tools no longer track upstream automatically — new Swift-syntax support or lint rules arrive only when someone bumps the version + SHA256 in the ensure-script (one file), proven green by CI in that commit.
+- **Revisit:** Bump deliberately every few months, or when a new Swift version needs newer tool support.
+
 ### 2026-07-16 — Animated readout is verified by recorded video, not a single screenshot
 - **What:** Scout's headline UI updates ~4×/sec; a still frame can't prove a value ticks or a graph scrolls. Timing/motion claims are verified from frames of `simctl io … recordVideo`.
 - **Why:** A single screenshot under-verifies animation, and the alternative (driving the real host cursor to "watch" it live) is unacceptable — a sibling harness (`basket`) hit exactly that and its loop took over the operator's real mouse before the video approach was codified.
