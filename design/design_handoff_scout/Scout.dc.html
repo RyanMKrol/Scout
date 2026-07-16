@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:#e8e6e1;font-family:-apple-system,"SF Pro Display","Helvetica Neue",Helvetica,system-ui,sans-serif;}
+  a{color:oklch(0.60 0.11 240);text-decoration:none;}
+  a:hover{color:oklch(0.50 0.13 240);}
+  @keyframes scoutPulse{0%,100%{opacity:0.3;transform:scale(0.8);}50%{opacity:1;transform:scale(1);}}
+  @keyframes scoutSweep{to{transform:rotate(360deg);}}
+</style>
+</helmet>
+
+<section style="padding:64px 56px 40px;">
+  <div style="max-width:720px;margin:0 0 8px;">
+    <div style="font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:oklch(0.55 0.02 60);">Scout · iOS · Turn 3 — Consent &amp; icon</div>
+    <h1 style="font-size:34px;font-weight:700;letter-spacing:-0.8px;color:#26241f;margin:10px 0 12px;">The honest data-use moment, and the app icon</h1>
+    <p style="font-size:17px;line-height:1.55;color:#5a574f;margin:0;max-width:640px;text-wrap:pretty;"><a href="#3a">3a</a> is the one intentional pause before measuring — a plain, non-alarming note that Scout transfers cellular data to read real speed. <a href="#3b">3b</a> is the icon: the radar mark from the splash, on the home screen.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:52px;align-items:flex-start;margin-top:44px;">
+
+    <!-- 3a — CONSENT -->
+    <div id="3a" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">3a</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">Data-use consent</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">Shown once on first run. Honest about what it costs, thumb-reachable buttons, no dark patterns — “Not now” is a real choice.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ T }}" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;padding:132px 32px 48px;background:#050506;">
+          <div style="position:relative;width:76px;height:76px;display:flex;align-items:center;justify-content:center;margin-bottom:32px;">
+            <div style="position:absolute;width:76px;height:76px;border-radius:50%;background:conic-gradient(from 0deg, transparent 268deg, oklch(0.80 0.14 158) 360deg);opacity:0.2;"></div>
+            <svg width="76" height="76" viewBox="0 0 76 76">
+              <circle cx="38" cy="38" r="35" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"></circle>
+              <circle cx="38" cy="38" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"></circle>
+              <circle cx="38" cy="38" r="4.5" fill="oklch(0.80 0.14 158)"></circle>
+            </svg>
+          </div>
+          <h2 style="margin:0;font-size:30px;font-weight:700;letter-spacing:-0.6px;line-height:1.12;color:#fff;text-wrap:balance;">Scout uses cellular data to measure</h2>
+          <p style="margin:16px 0 0;font-size:16px;line-height:1.55;color:rgba(255,255,255,0.6);text-wrap:pretty;">To read real, usable speed, Scout transfers a little data over your cellular connection while it’s running.</p>
+          <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+            <div style="display:flex;gap:13px;align-items:flex-start;">
+              <span style="width:6px;height:6px;border-radius:50%;background:oklch(0.80 0.14 158);margin-top:8px;flex-shrink:0;"></span>
+              <span style="font-size:15px;line-height:1.5;color:rgba(255,255,255,0.72);">Roughly <span style="color:#fff;font-weight:600;font-variant-numeric:tabular-nums;">10–40 MB per minute</span>, always shown on screen.</span>
+            </div>
+            <div style="display:flex;gap:13px;align-items:flex-start;">
+              <span style="width:6px;height:6px;border-radius:50%;background:oklch(0.80 0.14 158);margin-top:8px;flex-shrink:0;"></span>
+              <span style="font-size:15px;line-height:1.5;color:rgba(255,255,255,0.72);">Only while the screen is on and you’re looking — never in the background.</span>
+            </div>
+            <div style="display:flex;gap:13px;align-items:flex-start;">
+              <span style="width:6px;height:6px;border-radius:50%;background:oklch(0.80 0.14 158);margin-top:8px;flex-shrink:0;"></span>
+              <span style="font-size:15px;line-height:1.5;color:rgba(255,255,255,0.72);">On a metered or low-data plan? Keep sessions short.</span>
+            </div>
+          </div>
+          <div style="flex:1;"></div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="height:56px;border-radius:16px;background:oklch(0.80 0.14 158);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:650;letter-spacing:0.2px;color:#04140c;">Start sweeping</div>
+            <div style="height:44px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:rgba(255,255,255,0.5);">Not now</div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 3b — APP ICON -->
+    <div id="3b" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">3b</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">App icon</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">The radar mark: concentric rings, a live-green centre and a single sweep wedge on near-black. Reads clearly down to the smallest size.</p>
+      <div style="border-radius:28px;background:#dedcd6;padding:40px;display:flex;flex-direction:column;gap:36px;align-items:center;">
+        <div style="display:flex;align-items:flex-end;gap:32px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <div style="width:176px;height:176px;border-radius:40px;background:radial-gradient(120% 120% at 30% 25%, #101015 0%, #050506 70%);box-shadow:0 12px 30px rgba(0,0,0,0.28);position:relative;overflow:hidden;">
+              <div style="position:absolute;inset:0;background:conic-gradient(from 0deg, transparent 250deg, oklch(0.80 0.14 158 / 0.55) 358deg, transparent 360deg);"></div>
+              <svg width="176" height="176" viewBox="0 0 176 176" style="position:absolute;inset:0;">
+                <circle cx="88" cy="88" r="66" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="3"></circle>
+                <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="3"></circle>
+                <circle cx="88" cy="88" r="10" fill="oklch(0.82 0.15 158)"></circle>
+              </svg>
+            </div>
+            <span style="font-size:13px;color:#807c73;font-variant-numeric:tabular-nums;">180 pt</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <div style="width:112px;height:112px;border-radius:26px;background:radial-gradient(120% 120% at 30% 25%, #101015 0%, #050506 70%);box-shadow:0 8px 20px rgba(0,0,0,0.26);position:relative;overflow:hidden;">
+              <div style="position:absolute;inset:0;background:conic-gradient(from 0deg, transparent 250deg, oklch(0.80 0.14 158 / 0.55) 358deg, transparent 360deg);"></div>
+              <svg width="112" height="112" viewBox="0 0 176 176" style="position:absolute;inset:0;">
+                <circle cx="88" cy="88" r="66" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="3"></circle>
+                <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="3"></circle>
+                <circle cx="88" cy="88" r="10" fill="oklch(0.82 0.15 158)"></circle>
+              </svg>
+            </div>
+            <span style="font-size:13px;color:#807c73;font-variant-numeric:tabular-nums;">120 pt</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <div style="width:60px;height:60px;border-radius:14px;background:radial-gradient(120% 120% at 30% 25%, #101015 0%, #050506 70%);box-shadow:0 5px 12px rgba(0,0,0,0.24);position:relative;overflow:hidden;">
+              <div style="position:absolute;inset:0;background:conic-gradient(from 0deg, transparent 250deg, oklch(0.80 0.14 158 / 0.55) 358deg, transparent 360deg);"></div>
+              <svg width="60" height="60" viewBox="0 0 176 176" style="position:absolute;inset:0;">
+                <circle cx="88" cy="88" r="66" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="4"></circle>
+                <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"></circle>
+                <circle cx="88" cy="88" r="12" fill="oklch(0.82 0.15 158)"></circle>
+              </svg>
+            </div>
+            <span style="font-size:13px;color:#807c73;font-variant-numeric:tabular-nums;">60 pt</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:20px;background:#050506;">
+          <div style="width:52px;height:52px;border-radius:12px;background:radial-gradient(120% 120% at 30% 25%, #101015 0%, #050506 70%);position:relative;overflow:hidden;">
+            <div style="position:absolute;inset:0;background:conic-gradient(from 0deg, transparent 250deg, oklch(0.80 0.14 158 / 0.55) 358deg, transparent 360deg);"></div>
+            <svg width="52" height="52" viewBox="0 0 176 176" style="position:absolute;inset:0;">
+              <circle cx="88" cy="88" r="66" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="4"></circle>
+              <circle cx="88" cy="88" r="42" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"></circle>
+              <circle cx="88" cy="88" r="12" fill="oklch(0.82 0.15 158)"></circle>
+            </svg>
+          </div>
+          <span style="font-size:15px;font-weight:500;color:#fff;">Scout</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:64px 56px 40px;">
+  <div style="max-width:720px;margin:0 0 8px;">
+    <div style="font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:oklch(0.55 0.02 60);">Scout · iOS · Turn 2 — Sweep, developed</div>
+    <h1 style="font-size:34px;font-weight:700;letter-spacing:-0.8px;color:#26241f;margin:10px 0 12px;">1C built out — splash, the live dial, and the honest “can’t measure” state</h1>
+    <p style="font-size:17px;line-height:1.55;color:#5a574f;margin:0;max-width:640px;text-wrap:pretty;">The radar dial as the whole app: it opens on <a href="#2a">2a</a> (a brief splash), lands straight in <a href="#2b">2b</a> (measuring — no buttons), and falls back to <a href="#2c">2c</a> when there’s no cellular radio to read. Use the <strong>Scenario</strong> tweak to watch the dial move through Great / Usable / Poor.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:52px;align-items:flex-start;margin-top:44px;">
+
+    <!-- 2a — SPLASH -->
+    <div id="2a" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">2a</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">Splash</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">Opens with the radar mark sweeping, the wordmark, and one honest line. A second at most — then it’s measuring.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ T }}" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 30px 64px;background:#050506;position:relative;">
+          <div style="position:relative;width:196px;height:196px;display:flex;align-items:center;justify-content:center;margin-bottom:44px;">
+            <div style="position:absolute;width:196px;height:196px;border-radius:50%;background:conic-gradient(from 0deg, transparent 262deg, oklch(0.80 0.14 158) 360deg);opacity:0.18;animation:scoutSweep 3.2s linear infinite;"></div>
+            <svg width="196" height="196" viewBox="0 0 196 196">
+              <circle cx="98" cy="98" r="92" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1.5"></circle>
+              <circle cx="98" cy="98" r="62" fill="none" stroke="rgba(255,255,255,0.11)" stroke-width="1.5"></circle>
+              <circle cx="98" cy="98" r="32" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="1.5"></circle>
+              <circle cx="98" cy="98" r="6" fill="oklch(0.80 0.14 158)"></circle>
+            </svg>
+          </div>
+          <span style="font-size:48px;font-weight:650;letter-spacing:-1.5px;color:#fff;">Scout</span>
+          <span style="font-size:17px;font-weight:500;color:rgba(255,255,255,0.5);margin-top:12px;">Find your signal.</span>
+          <div style="position:absolute;bottom:64px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:18px;">
+            <div style="width:132px;height:3px;border-radius:99px;background:rgba(255,255,255,0.12);overflow:hidden;">
+              <div style="width:40%;height:100%;border-radius:99px;background:oklch(0.80 0.14 158);"></div>
+            </div>
+            <span style="font-size:12px;letter-spacing:0.3px;color:rgba(255,255,255,0.3);">Measures real usable speed — not signal bars</span>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 2b — MEASURING (refined 1c) -->
+    <div id="2b" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">2b</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">Measuring</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">The home screen. Arc fills with measured speed, sweep rotates, number and generation live in the centre, session data pinned below.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ T }}" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:120px 30px 48px;background:#050506;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ numberColor }};animation:scoutPulse 1.6s ease-in-out infinite;"></span>
+            <span style="font-size:14px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);">Sweeping</span>
+          </div>
+          <div style="position:relative;width:288px;height:288px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;width:258px;height:258px;border-radius:50%;background:conic-gradient(from 0deg, transparent 268deg, {{ ringColor }} 360deg);opacity:0.14;animation:scoutSweep 3.4s linear infinite;"></div>
+            <svg width="288" height="288" viewBox="0 0 288 288" style="position:absolute;inset:0;transform:rotate(-90deg);">
+              <circle cx="144" cy="144" r="132" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7"></circle>
+              <circle cx="144" cy="144" r="132" fill="none" stroke="{{ ringColor }}" stroke-width="7" stroke-linecap="round" stroke-dasharray="{{ ringDash2 }}" style="transition:stroke-dasharray .28s linear, stroke .45s ease;"></circle>
+            </svg>
+            <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+              <span style="font-size:15px;font-weight:590;letter-spacing:2px;color:rgba(255,255,255,0.5);">{{ gen }}</span>
+              <span style="font-size:88px;line-height:0.9;font-weight:600;letter-spacing:-3px;font-variant-numeric:tabular-nums;color:{{ numberColor }};transition:color .45s ease;margin-top:6px;">{{ mbpsStr }}</span>
+              <span style="font-size:18px;font-weight:500;color:rgba(255,255,255,0.55);margin-top:4px;">Mbps</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;color:rgba(255,255,255,0.5);">
+            <span style="font-size:20px;font-weight:600;letter-spacing:0.4px;color:{{ numberColor }};transition:color .45s ease;">{{ qlabel }}</span>
+            <div style="display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums;font-size:15px;">
+              <svg width="12" height="14" viewBox="0 0 13 14"><path d="M6.5 1v9M6.5 10.5 3 7M6.5 10.5 10 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span style="color:rgba(255,255,255,0.72);">{{ dataStr }}</span>
+              <span>this session</span>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 2c — NO CELLULAR -->
+    <div id="2c" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">2c</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">No cellular</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">Scout reads the cellular radio specifically, so it needs a calm, honest fallback when there’s nothing to measure — dimmed dial, plain explanation, no alarm.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ T }}" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:120px 30px 48px;background:#050506;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.28);"></span>
+            <span style="font-size:14px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);">Paused</span>
+          </div>
+          <div style="position:relative;width:288px;height:288px;display:flex;align-items:center;justify-content:center;">
+            <svg width="288" height="288" viewBox="0 0 288 288" style="position:absolute;inset:0;transform:rotate(-90deg);">
+              <circle cx="144" cy="144" r="132" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"></circle>
+            </svg>
+            <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+              <span style="font-size:96px;line-height:0.9;font-weight:600;letter-spacing:-2px;color:rgba(255,255,255,0.22);">—</span>
+              <span style="font-size:18px;font-weight:500;color:rgba(255,255,255,0.35);margin-top:6px;">Mbps</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 12px;">
+            <span style="font-size:20px;font-weight:600;color:rgba(255,255,255,0.82);">No cellular to measure</span>
+            <p style="margin:0;font-size:15px;line-height:1.5;text-align:center;text-wrap:pretty;color:rgba(255,255,255,0.5);max-width:280px;">Scout measures your <strong style="color:rgba(255,255,255,0.7);font-weight:600;">cellular</strong> speed. Turn off Airplane Mode or Wi-Fi to start sweeping.</p>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:64px 56px 96px;">
+  <div style="max-width:720px;margin:0 0 8px;">
+    <div style="font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:oklch(0.55 0.02 60);">Scout · iOS · Turn 1</div>
+    <h1 style="font-size:34px;font-weight:700;letter-spacing:-0.8px;color:#26241f;margin:10px 0 12px;">Four ways to read “good vs bad” — without bars</h1>
+    <p style="font-size:17px;line-height:1.55;color:#5a574f;margin:0;max-width:640px;text-wrap:pretty;">The core screen is one live number — real measured Mbps, updating ~4×/sec, with the radio generation. No buttons, no history: open it and it’s already measuring. Each direction below answers the same question differently: how do you convey a strong or weak spot honestly? All four share one simulated signal, so you’re seeing the same moment four times. Use the <strong>Scenario</strong> tweak to force Great / Usable / Poor and compare. Reference them in chat as <a href="#1a">1a</a>, <a href="#1b">1b</a>, <a href="#1c">1c</a>, <a href="#1d">1d</a>.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:52px;align-items:flex-start;margin-top:44px;">
+
+    <!-- 1a — READOUT -->
+    <div id="1a" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">1a</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">Readout</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">Clinical, number-led. Quality shows <em>only</em> through the number’s color and one small word — the most restrained, most instrument-like.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ T }}" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:120px 30px 48px;background:#000;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ numberColor }};animation:scoutPulse 1.6s ease-in-out infinite;"></span>
+            <span style="font-size:14px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);">Measuring</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <span style="font-size:16px;font-weight:590;letter-spacing:2px;color:rgba(255,255,255,0.55);">{{ gen }}</span>
+            <span style="font-size:152px;line-height:0.88;font-weight:600;letter-spacing:-5px;font-variant-numeric:tabular-nums;color:{{ numberColor }};transition:color .45s ease;margin-top:12px;">{{ mbpsStr }}</span>
+            <span style="font-size:26px;font-weight:500;color:rgba(255,255,255,0.58);margin-top:6px;">Mbps</span>
+            <span style="margin-top:26px;font-size:20px;font-weight:600;letter-spacing:0.4px;color:{{ numberColor }};transition:color .45s ease;">{{ qlabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:rgba(255,255,255,0.5);">
+            <div style="display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums;font-size:15px;">
+              <svg width="12" height="14" viewBox="0 0 13 14"><path d="M6.5 1v9M6.5 10.5 3 7M6.5 10.5 10 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span style="color:rgba(255,255,255,0.72);">{{ dataStr }}</span>
+              <span>this session</span>
+            </div>
+            <sc-if value="{{ honest }}" hint-placeholder-val="{{ T }}">
+              <span style="font-size:12px;letter-spacing:0.3px;color:rgba(255,255,255,0.3);">Real usable speed — not signal bars</span>
+            </sc-if>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 1b — VERDICT -->
+    <div id="1b" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">1b</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">Verdict</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">Plain-language judgement first, the number as evidence beneath. Warmest and most reassuring for non-technical users. Light mode.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:120px 34px 48px;background:#F6F5F3;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ numberColor }};animation:scoutPulse 1.6s ease-in-out infinite;"></span>
+            <span style="font-size:14px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:#9a968d;">Measuring</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <span style="font-size:44px;font-weight:700;letter-spacing:-1px;line-height:1.06;color:#1a1916;text-align:center;text-wrap:balance;max-width:300px;">{{ phrase }}</span>
+            <div style="display:flex;align-items:baseline;gap:11px;margin-top:32px;">
+              <span style="font-size:62px;font-weight:650;letter-spacing:-2px;font-variant-numeric:tabular-nums;color:{{ numberColor }};transition:color .45s ease;">{{ mbpsStr }}</span>
+              <span style="font-size:23px;font-weight:500;color:#8f8b82;">Mbps</span>
+            </div>
+            <span style="margin-top:8px;font-size:16px;font-weight:500;letter-spacing:1px;color:#a5a198;">on {{ gen }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:#a5a198;">
+            <div style="display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums;font-size:15px;">
+              <svg width="12" height="14" viewBox="0 0 13 14"><path d="M6.5 1v9M6.5 10.5 3 7M6.5 10.5 10 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span style="color:#7c786f;">{{ dataStr }}</span>
+              <span>this session</span>
+            </div>
+            <sc-if value="{{ honest }}" hint-placeholder-val="{{ T }}">
+              <span style="font-size:12px;letter-spacing:0.3px;color:#bdb9af;">Real usable speed — not signal bars</span>
+            </sc-if>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 1c — SWEEP -->
+    <div id="1c" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">1c</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">Sweep</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">A radar-style dial: the arc fills continuously with real speed (log scale) and a slow sweep rotates behind it — the metal-detector metaphor made literal, but never bars.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ T }}" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:120px 30px 48px;background:#050506;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ numberColor }};animation:scoutPulse 1.6s ease-in-out infinite;"></span>
+            <span style="font-size:14px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);">Sweeping</span>
+          </div>
+          <div style="position:relative;width:280px;height:280px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;width:250px;height:250px;border-radius:50%;background:conic-gradient(from 0deg, transparent 268deg, {{ ringColor }} 360deg);opacity:0.14;animation:scoutSweep 3.4s linear infinite;"></div>
+            <svg width="280" height="280" viewBox="0 0 280 280" style="position:absolute;inset:0;transform:rotate(-90deg);">
+              <circle cx="140" cy="140" r="128" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7"></circle>
+              <circle cx="140" cy="140" r="128" fill="none" stroke="{{ ringColor }}" stroke-width="7" stroke-linecap="round" stroke-dasharray="{{ ringDash }}" style="transition:stroke-dasharray .28s linear, stroke .45s ease;"></circle>
+            </svg>
+            <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+              <span style="font-size:15px;font-weight:590;letter-spacing:2px;color:rgba(255,255,255,0.5);">{{ gen }}</span>
+              <span style="font-size:82px;line-height:0.9;font-weight:600;letter-spacing:-3px;font-variant-numeric:tabular-nums;color:{{ numberColor }};transition:color .45s ease;margin-top:6px;">{{ mbpsStr }}</span>
+              <span style="font-size:18px;font-weight:500;color:rgba(255,255,255,0.55);margin-top:4px;">Mbps</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:rgba(255,255,255,0.5);">
+            <span style="font-size:19px;font-weight:600;letter-spacing:0.4px;color:{{ numberColor }};transition:color .45s ease;">{{ qlabel }}</span>
+            <div style="display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums;font-size:15px;">
+              <svg width="12" height="14" viewBox="0 0 13 14"><path d="M6.5 1v9M6.5 10.5 3 7M6.5 10.5 10 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span style="color:rgba(255,255,255,0.72);">{{ dataStr }}</span>
+              <span>this session</span>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 1d — FIELD -->
+    <div id="1d" style="display:flex;flex-direction:column;gap:18px;width:402px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;border-radius:999px;background:#26241f;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;">1d</span>
+        <span style="font-size:19px;font-weight:650;color:#26241f;">Field</span>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#6b675e;max-width:380px;">The whole screen glows with the answer — the background field shifts calmly with quality. Maximally glanceable at arm’s length; the phone itself becomes the instrument face.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ T }}" hint-size="402px,874px">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:120px 30px 48px;background:{{ fieldBg }};transition:background .6s ease;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.9);animation:scoutPulse 1.6s ease-in-out infinite;"></span>
+            <span style="font-size:14px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.7);">{{ gen }} · Measuring</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <span style="font-size:160px;line-height:0.86;font-weight:650;letter-spacing:-6px;font-variant-numeric:tabular-nums;color:#fff;">{{ mbpsStr }}</span>
+            <span style="font-size:28px;font-weight:500;color:rgba(255,255,255,0.82);margin-top:8px;">Mbps</span>
+            <span style="margin-top:24px;font-size:20px;font-weight:600;letter-spacing:0.4px;color:#fff;">{{ qlabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:rgba(255,255,255,0.78);">
+            <div style="display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums;font-size:15px;">
+              <svg width="12" height="14" viewBox="0 0 13 14"><path d="M6.5 1v9M6.5 10.5 3 7M6.5 10.5 10 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span style="color:#fff;">{{ dataStr }}</span>
+              <span>this session</span>
+            </div>
+            <sc-if value="{{ honest }}" hint-placeholder-val="{{ T }}">
+              <span style="font-size:12px;letter-spacing:0.3px;color:rgba(255,255,255,0.55);">Real usable speed — not signal bars</span>
+            </sc-if>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Live&quot;,&quot;Great&quot;,&quot;Usable&quot;,&quot;Poor&quot;],&quot;default&quot;:&quot;Live&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;showHonestNote&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  state = { mbps: 58, gen: '5G', dataMB: 0, tick: 0 };
+
+  componentDidMount() { this._t = setInterval(() => this.tick(), 250); }
+  componentWillUnmount() { clearInterval(this._t); }
+
+  tick() {
+    const sc = this.props.scenario || 'Live';
+    this.setState(s => {
+      let m;
+      if (sc === 'Live') {
+        m = s.mbps + (Math.random() - 0.5) * 22;
+        if (Math.random() < 0.06) m += (Math.random() - 0.4) * 72;
+        m = Math.max(2, Math.min(168, m));
+      } else {
+        const band = { Great: [80, 140], Usable: [24, 66], Poor: [3, 14] }[sc];
+        const center = (band[0] + band[1]) / 2;
+        m = s.mbps + (center - s.mbps) * 0.28 + (Math.random() - 0.5) * (band[1] - band[0]) * 0.4;
+        m = Math.max(band[0] * 0.7, Math.min(band[1] * 1.12, m));
+      }
+      let gen = s.gen;
+      if (sc === 'Poor') { gen = gen === '3G' ? (Math.random() < 0.5 ? 'LTE' : '3G') : 'LTE'; if (Math.random() < 0.15) gen = '3G'; }
+      else if (sc === 'Great') { gen = '5G'; }
+      else if (Math.random() < 0.02) gen = gen === '5G' ? 'LTE' : '5G';
+      return { mbps: m, gen, dataMB: s.dataMB + m * 0.03125, tick: s.tick + 1 };
+    });
+  }
+
+  qual(m) { return m >= 72 ? 'great' : m >= 18 ? 'usable' : 'poor'; }
+
+  renderVals() {
+    const m = this.state.mbps;
+    const q = this.qual(m);
+    const color = { great: 'oklch(0.80 0.14 158)', usable: 'oklch(0.82 0.13 82)', poor: 'oklch(0.70 0.10 30)' };
+    const field = { great: 'oklch(0.42 0.10 158)', usable: 'oklch(0.46 0.10 84)', poor: 'oklch(0.40 0.055 28)' };
+    const phrase = { great: 'Great signal here', usable: 'Usable signal', poor: 'Weak here — keep moving' };
+    const label = { great: 'Great', usable: 'Usable', poor: 'Poor' };
+    const mbpsStr = m >= 10 ? Math.round(m).toString() : m.toFixed(1);
+    const C = 2 * Math.PI * 128;
+    const C2 = 2 * Math.PI * 132;
+    const pct = Math.max(0.04, Math.min(1, Math.log10(m + 1) / Math.log10(169)));
+    return {
+      T: true,
+      honest: this.props.showHonestNote ?? true,
+      mbpsStr,
+      gen: this.state.gen,
+      dataStr: (this.state.dataMB < 10 ? this.state.dataMB.toFixed(1) : Math.round(this.state.dataMB).toString()) + ' MB',
+      numberColor: color[q],
+      ringColor: color[q],
+      fieldBg: field[q],
+      phrase: phrase[q],
+      qlabel: label[q],
+      ringDash: (C * pct).toFixed(1) + ' ' + C.toFixed(1),
+      ringDash2: (C2 * pct).toFixed(1) + ' ' + C2.toFixed(1),
+    };
+  }
+}
+</script>
+</body>
+</html>
