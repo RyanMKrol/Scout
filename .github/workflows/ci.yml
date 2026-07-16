@@ -32,15 +32,17 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
+      # SwiftFormat/SwiftLint are PINNED (version + checksum) via tools/ensure-dod-tools.sh so CI
+      # and the local gate run byte-identical tools — a new brew release can't redline CI with
+      # failures unrelated to the diff. Bump versions in that script, never here.
+      - name: Install pinned DoD tools
+        run: ./tools/ensure-dod-tools.sh
+
       - name: Format check
-        run: |
-          brew install swiftformat
-          swiftformat Sources Tests --lint
+        run: ./tools/bin/swiftformat Sources Tests --lint
 
       - name: Lint
-        run: |
-          brew install swiftlint
-          swiftlint --strict
+        run: ./tools/bin/swiftlint --strict
 
       - name: Resolve an available iPhone simulator
         id: sim
