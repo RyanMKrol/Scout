@@ -28,7 +28,7 @@ claim about motion/timing over time, capture a short **video of the simulator fr
 frames, rather than one screenshot (and NEVER drive the real host mouse/keyboard to "watch" it live):
 
 ```bash
-UDID=<the booted Scout-Sim UDID>
+UDID=$(tools/loop_sim.sh)   # the dedicated Scout-Sim (ensured + resolved; never a generic model)
 xcrun simctl io "$UDID" recordVideo --codec h264 screenshots/run.mov &   # Ctrl-C or kill to stop
 # …drive the app / let the readout run for a few seconds…
 kill %1 2>/dev/null || true

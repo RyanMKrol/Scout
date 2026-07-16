@@ -37,8 +37,12 @@ The cold builder only sees the spec — so any repo rule that must hold has to b
   250 ms, the rolling label reads '20.0 Mbps' within 1 s"), never "it displays the speed".
 - **UI tests:** require `accessibilityIdentifier` queries (never display copy) and bounded waits; never
   assert live UI state directly.
-- **Simulator:** the pinned LOCAL destination is the dedicated `Scout-Sim` by UDID (see root CLAUDE.md);
-  CI resolves a sim by name. `xcodegen generate` runs first in every build/test command.
+- **Simulator:** the LOCAL destination is always the dedicated `Scout-Sim`, ensured by
+  `tools/loop_sim.sh` (idempotent create + UDID print; the unique NAME is the collision guard against
+  other loops on this Mac — see root CLAUDE.md). Never author a spec that tells a builder to target a
+  generic model name (`iPhone 16`) locally — a spec that mints a NEW sim-touching script must have it
+  default to `Scout-Sim` via `tools/loop_sim.sh`. CI resolves its own runner-local sim (deliberately
+  NOT pinned). `xcodegen generate` runs first in every build/test command.
 - **Layer picking (facets):** `Sources/**/Views` / SwiftUI screens = `ui`; the pure Mbps/windowing math =
   `measurement`; `NetworkConnection`/`.cellular` transport wrappers = `networking`; `CoreTelephony` radio
   reads = `telephony`; app entry / lifecycle / session state = `app`; `project.yml` / CI / lint config =

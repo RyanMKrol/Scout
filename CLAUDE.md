@@ -193,11 +193,18 @@ them, don't abandon the task:**
   - **Format:** `swiftformat Sources Tests --lint`
   - **Lint:** `swiftlint --strict`
   - **Test + Build:** `xcodebuild test -project Scout.xcodeproj -scheme Scout -destination '…' CODE_SIGNING_ALLOWED=NO` — `xcodebuild test` compiles first, so the build step is folded in. Simulator builds need **no code signing**. CI resolves the simulator name dynamically (`.github/actions/resolve-simulator`) so a runner dropping a model doesn't hard-fail the gate.
-- **Local runs pin a DEDICATED simulator by UDID, not by name.** Create one Scout-only sim once
-  (`xcrun simctl create "Scout-Sim" <deviceType> <iOS-26 runtime>`, T001 does this) and override the
-  local `xcodebuild -destination` to `id=<UDID>`, NOT `name=iPhone 16`. Two iOS loops sharing a
-  by-name device fight over the foreground app and reset each other's sims mid-test. CI stays by-name
-  (one sim per runner) — the committed `LOCAL_DOD` default is by-name; the UDID pin is a LOCAL override.
+- **Local runs target a DEDICATED, uniquely-named simulator — `Scout-Sim` — never a generic model
+  name.** `tools/loop_sim.sh` idempotently ensures it exists (reuses it, else creates it on the newest
+  installed iOS runtime) and prints its UDID; prefix local test commands with
+  `./tools/loop_sim.sh >/dev/null &&` (the committed `LOCAL_DOD` does). A unique NAME is the collision
+  guard — two projects with different dedicated names can never converge on one device, whereas two
+  iOS loops sharing `name=iPhone 16` fight over the foreground app and reset each other's sims
+  mid-test. **Pinning must cover EVERY surface that names a destination** (the `LOCAL_DOD` gate,
+  `build_run.sh`, the build preamble, both CLAUDE.mds, task specs, and any NEW sim-touching script a
+  task creates — the build preamble carries a standing override for spec prose), not just the gate; a
+  half-applied pin leaves the collision fully intact. CI is the deliberate exception: its workflow
+  resolves a generic sim on its own ephemeral runner (one loop per runner, no shared machine) — never
+  "fix" CI to `Scout-Sim`.
 - **Testing convention:** XCTest (not Swift Testing, for consistency with the team's sibling harness
   projects unless deliberately chosen otherwise). All cellular/radio I/O sits behind a protocol
   (`ThroughputSampler` / `RadioInfoProviding`) with a scripted fake — the live path is device-only and

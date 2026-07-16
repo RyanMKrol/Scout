@@ -3,6 +3,14 @@
 - **The `.xcodeproj` is generated — never hand-edit it or `Sources/Info.plist`.** Change project-level
   settings by editing `project.yml` and running `xcodegen generate`. New source files just go under
   `Sources/` (or `Tests/`) and are picked up automatically on the next generate.
+- **Test destination — ALWAYS the dedicated `Scout-Sim`, never a generic model name.** Ensure it
+  exists with `./tools/loop_sim.sh` (idempotent; prints the UDID). **This overrides any command text
+  quoted in a task's spec or `verify`:** if a spec says `name=iPhone 16` (or any generic model),
+  substitute `name=Scout-Sim` when you run it. Any NEW script or tool a task has you create that
+  boots or targets a simulator must default to `Scout-Sim` via `tools/loop_sim.sh`, never a generic
+  model. Simulators are exclusive resources — a generic by-name device is shared with other loops on
+  this Mac, and two loops installing/launching onto one device stamp on each other. (Exception: CI
+  workflows resolve their own runner-local sim — never "fix" CI to `Scout-Sim`.)
 - **Live-radio code is NEVER exercised in tests or CI.** The real throughput path
   (`NetworkConnection` bound to `.cellular`) and the radio-generation read (`CoreTelephony`) do not
   work on the Simulator or CI — there is no cellular radio. Put every such surface behind a protocol

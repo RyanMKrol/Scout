@@ -22,12 +22,15 @@ APP_NAME="Scout"
 BUNDLE_ID="com.ryankrol.scout"
 SIM_NAME="${1:-Scout-Sim}"   # dedicated device by name; pass a UDID to pin a specific one
 
-# Resolve the argument to a concrete UDID. A device *name* can be ambiguous (the same model
-# exists per installed runtime), so prefer an already-booted match, else the newest available.
-# Every grep pipeline ends in `|| true` — under `set -euo pipefail` a grep that matches nothing
-# would otherwise abort the whole script silently before the first echo.
+# Resolve the argument to a concrete UDID. For the dedicated default device, tools/loop_sim.sh
+# ENSURES it exists (idempotent create on the newest iOS runtime) and prints its UDID — so a
+# fresh machine self-heals. For any other name, prefer an already-booted match, else the newest
+# available. Every grep pipeline ends in `|| true` — under `set -euo pipefail` a grep that
+# matches nothing would otherwise abort the whole script silently before the first echo.
 if [[ "$SIM_NAME" =~ ^[0-9A-Fa-f]{8}-[0-9A-Fa-f-]{27}$ ]]; then
   SIM="$SIM_NAME"
+elif [ "$SIM_NAME" = "${SCOUT_SIM_NAME:-Scout-Sim}" ]; then
+  SIM="$("$PROJECT_DIR/tools/loop_sim.sh")"
 else
   SIM_ID="$(xcrun simctl list devices booted | grep -F "$SIM_NAME (" | grep -Eo '[0-9A-Fa-f-]{36}' | head -1 || true)"
   if [ -z "$SIM_ID" ]; then
