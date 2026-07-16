@@ -620,7 +620,8 @@
         "T016",
         "T017",
         "T019",
-        "T020"
+        "T020",
+        "T035"
       ],
       "gate": "needs-human",
       "tags": [
@@ -864,6 +865,39 @@
       "verify": [],
       "expectsTest": false,
       "spec": ".harness/tasks/T034.md"
+    },
+    {
+      "id": "T035",
+      "title": "🔒 Device signing setup (Apple Developer team in project.yml)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": "needs-human",
+      "tags": [
+        "shipping"
+      ],
+      "scope": [],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T035.md"
+    },
+    {
+      "id": "T036",
+      "title": "🔒 TestFlight / App Store submission",
+      "status": "pending",
+      "dependsOn": [
+        "T023",
+        "T024",
+        "T025",
+        "T026"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "shipping"
+      ],
+      "scope": [],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T036.md"
     }
   ]
 }
