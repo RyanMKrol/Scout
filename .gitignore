@@ -1,5 +1,7 @@
 # XcodeGen output — the .xcodeproj is regenerated from project.yml, never committed.
 *.xcodeproj/
+# XcodeGen also generates Sources/Info.plist from project.yml's info.properties.
+Sources/Info.plist
 
 # Visual-verification scratch (build_run.sh output)
 screenshots/

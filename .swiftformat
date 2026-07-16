@@ -1,0 +1,11 @@
+# SwiftFormat config — minimal and stable; CI runs `swiftformat --lint Sources Tests`.
+--swiftversion 6.0
+
+# Keep close to SwiftFormat defaults so local (0.61.x) and CI (brew latest) agree.
+--indent 4
+--maxwidth 120
+--wraparguments before-first
+--wrapcollections before-first
+
+# Rules that fight SwiftLint or churn diffs for no benefit:
+--disable wrapMultilineStatementBraces
