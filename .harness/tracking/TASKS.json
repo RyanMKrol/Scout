@@ -115,7 +115,7 @@
     },
     {
       "id": "T006",
-      "title": "Measurement seams: protocols + simulated (scripted) providers",
+      "title": "Measurement seams (frozen protocols) + scenario-walk math (pure)",
       "status": "pending",
       "dependsOn": [
         "T004"
@@ -194,13 +194,11 @@
     },
     {
       "id": "T009",
-      "title": "App shell: RootView, composition root, launch-arg controls, foreground-only lifecycle (P0)",
+      "title": "Composition root: AppEnvironment (providers + scenario parsing)",
       "status": "pending",
       "dependsOn": [
-        "T003",
-        "T006",
         "T007",
-        "T008"
+        "T027"
       ],
       "gate": null,
       "tags": [
@@ -214,24 +212,20 @@
         ]
       },
       "scope": [
-        "Sources/App/**",
-        "Sources/Screens/**",
-        "Sources/ScoutApp.swift",
-        "Sources/ContentView.swift"
+        "Sources/App/**"
       ],
       "design": null,
       "verify": [],
       "expectsTest": true,
-      "visualVerify": true,
+      "visualVerify": false,
       "spec": ".harness/tasks/T009.md"
     },
     {
       "id": "T010",
-      "title": "Shared visual primitives: sweep wedge, pulsing dot, radar mark",
+      "title": "Animated primitives: SweepWedgeView + PulsingDot",
       "status": "pending",
       "dependsOn": [
-        "T003",
-        "T009"
+        "T003"
       ],
       "gate": null,
       "tags": [
@@ -243,21 +237,21 @@
         "risk": []
       },
       "scope": [
-        "Sources/DesignSystem/**",
-        "Sources/Screens/**"
+        "Sources/DesignSystem/**"
       ],
       "design": null,
       "verify": [],
       "expectsTest": false,
-      "spec": ".harness/tasks/T010.md"
+      "spec": ".harness/tasks/T010.md",
+      "visualVerify": false
     },
     {
       "id": "T011",
       "title": "Splash screen (full fidelity)",
       "status": "pending",
       "dependsOn": [
-        "T009",
-        "T010"
+        "T029",
+        "T030"
       ],
       "gate": null,
       "tags": [
@@ -282,8 +276,8 @@
       "title": "First-run consent screen (full fidelity)",
       "status": "pending",
       "dependsOn": [
-        "T009",
-        "T010"
+        "T029",
+        "T030"
       ],
       "gate": null,
       "tags": [
@@ -305,12 +299,13 @@
     },
     {
       "id": "T013",
-      "title": "SweepDial: dual-arc radar dial component",
+      "title": "SweepDial: dual-arc radar dial assembly",
       "status": "pending",
       "dependsOn": [
         "T004",
-        "T009",
-        "T010"
+        "T010",
+        "T029",
+        "T031"
       ],
       "gate": null,
       "tags": [
@@ -436,7 +431,7 @@
     },
     {
       "id": "T018",
-      "title": "HTTP probe support: request building, incremental response parsing, pacing (pure)",
+      "title": "Incremental HTTP/1.1 response parser (pure)",
       "status": "pending",
       "dependsOn": [
         "T001"
@@ -466,7 +461,8 @@
       "dependsOn": [
         "T006",
         "T009",
-        "T018"
+        "T018",
+        "T032"
       ],
       "gate": null,
       "tags": [
@@ -491,12 +487,13 @@
     },
     {
       "id": "T020",
-      "title": "Accessibility: VoiceOver combined element, Dynamic Type, Reduce Motion audit",
+      "title": "Accessibility application: VoiceOver, Dynamic Type, Reduce Motion audit",
       "status": "pending",
       "dependsOn": [
         "T012",
         "T014",
-        "T015"
+        "T015",
+        "T033"
       ],
       "gate": null,
       "tags": [
@@ -654,6 +651,192 @@
       "design": null,
       "verify": [],
       "spec": ".harness/tasks/T026.md"
+    },
+    {
+      "id": "T027",
+      "title": "Simulated providers (scripted async streams)",
+      "status": "pending",
+      "dependsOn": [
+        "T006"
+      ],
+      "gate": null,
+      "tags": [
+        "domain",
+        "seams"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T027.md"
+    },
+    {
+      "id": "T028",
+      "title": "RootView: routing UI, splash overlay, stub screens",
+      "status": "pending",
+      "dependsOn": [
+        "T003",
+        "T008",
+        "T009"
+      ],
+      "gate": null,
+      "tags": [
+        "app"
+      ],
+      "facets": {
+        "layer": "app",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/App/**",
+        "Sources/Screens/**",
+        "Sources/ScoutApp.swift",
+        "Sources/ContentView.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "visualVerify": true,
+      "spec": ".harness/tasks/T028.md"
+    },
+    {
+      "id": "T029",
+      "title": "Foreground-only lifecycle (P0) + screenshot launch-arg plumbing",
+      "status": "pending",
+      "dependsOn": [
+        "T028"
+      ],
+      "gate": null,
+      "tags": [
+        "app"
+      ],
+      "facets": {
+        "layer": "app",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/App/**",
+        "Sources/Screens/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "visualVerify": true,
+      "spec": ".harness/tasks/T029.md"
+    },
+    {
+      "id": "T030",
+      "title": "RadarMarkView (splash + consent variants), shown on the splash stub",
+      "status": "pending",
+      "dependsOn": [
+        "T010",
+        "T029"
+      ],
+      "gate": null,
+      "tags": [
+        "design-system"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/DesignSystem/**",
+        "Sources/Screens/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T030.md"
+    },
+    {
+      "id": "T031",
+      "title": "Dial building blocks: arrow glyphs + center stacks (live & idle)",
+      "status": "pending",
+      "dependsOn": [
+        "T003",
+        "T004",
+        "T029"
+      ],
+      "gate": null,
+      "tags": [
+        "design-system",
+        "dial"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/DesignSystem/**",
+        "Sources/Screens/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T031.md"
+    },
+    {
+      "id": "T032",
+      "title": "HTTP probe requests + probe pacing (pure)",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "live",
+        "http"
+      ],
+      "facets": {
+        "layer": "networking",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Live/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T032.md"
+    },
+    {
+      "id": "T033",
+      "title": "AccessibilitySummary: the spoken-value builder (pure)",
+      "status": "pending",
+      "dependsOn": [
+        "T004"
+      ],
+      "gate": null,
+      "tags": [
+        "accessibility"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T033.md"
     }
   ]
 }
