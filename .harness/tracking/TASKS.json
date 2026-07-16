@@ -8,11 +8,652 @@
       "status": "pending",
       "dependsOn": [],
       "gate": "needs-human",
-      "tags": ["scaffold"],
+      "tags": [
+        "scaffold"
+      ],
       "scope": [],
       "design": null,
       "verify": [],
       "spec": ".harness/tasks/T001.md"
+    },
+    {
+      "id": "T002",
+      "title": "README truth-up: align concept doc with the settled v1 design (design folder is source of truth)",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "docs"
+      ],
+      "facets": {
+        "layer": "docs",
+        "workType": "docs",
+        "risk": []
+      },
+      "scope": [
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "ciSkipOk": true,
+      "spec": ".harness/tasks/T002.md"
+    },
+    {
+      "id": "T003",
+      "title": "Design tokens: ScoutTheme colors + motion constants",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "design-system"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "config",
+        "risk": []
+      },
+      "scope": [
+        "Sources/DesignSystem/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T003.md"
+    },
+    {
+      "id": "T004",
+      "title": "Domain model: quality bands, radio generation, capped display formatting, dial scale (pure)",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "domain"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T004.md"
+    },
+    {
+      "id": "T005",
+      "title": "Rolling throughput window (pure, transfer-time-weighted)",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "domain"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T005.md"
+    },
+    {
+      "id": "T006",
+      "title": "Measurement seams: protocols + simulated (scripted) providers",
+      "status": "pending",
+      "dependsOn": [
+        "T004"
+      ],
+      "gate": null,
+      "tags": [
+        "domain",
+        "seams"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T006.md"
+    },
+    {
+      "id": "T007",
+      "title": "SweepSession: observable measurement session engine (P0 stop-on-background contract)",
+      "status": "pending",
+      "dependsOn": [
+        "T005",
+        "T006"
+      ],
+      "gate": null,
+      "tags": [
+        "domain",
+        "session"
+      ],
+      "facets": {
+        "layer": "app",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T007.md"
+    },
+    {
+      "id": "T008",
+      "title": "AppRouter: app-phase state machine (pure)",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "app"
+      ],
+      "facets": {
+        "layer": "app",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T008.md"
+    },
+    {
+      "id": "T009",
+      "title": "App shell: RootView, composition root, launch-arg controls, foreground-only lifecycle (P0)",
+      "status": "pending",
+      "dependsOn": [
+        "T003",
+        "T006",
+        "T007",
+        "T008"
+      ],
+      "gate": null,
+      "tags": [
+        "app"
+      ],
+      "facets": {
+        "layer": "app",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/App/**",
+        "Sources/Screens/**",
+        "Sources/ScoutApp.swift",
+        "Sources/ContentView.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "visualVerify": true,
+      "spec": ".harness/tasks/T009.md"
+    },
+    {
+      "id": "T010",
+      "title": "Shared visual primitives: sweep wedge, pulsing dot, radar mark",
+      "status": "pending",
+      "dependsOn": [
+        "T003",
+        "T009"
+      ],
+      "gate": null,
+      "tags": [
+        "design-system"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/DesignSystem/**",
+        "Sources/Screens/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T010.md"
+    },
+    {
+      "id": "T011",
+      "title": "Splash screen (full fidelity)",
+      "status": "pending",
+      "dependsOn": [
+        "T009",
+        "T010"
+      ],
+      "gate": null,
+      "tags": [
+        "screen"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Screens/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T011.md"
+    },
+    {
+      "id": "T012",
+      "title": "First-run consent screen (full fidelity)",
+      "status": "pending",
+      "dependsOn": [
+        "T009",
+        "T010"
+      ],
+      "gate": null,
+      "tags": [
+        "screen"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Screens/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T012.md"
+    },
+    {
+      "id": "T013",
+      "title": "SweepDial: dual-arc radar dial component",
+      "status": "pending",
+      "dependsOn": [
+        "T004",
+        "T009",
+        "T010"
+      ],
+      "gate": null,
+      "tags": [
+        "design-system",
+        "dial"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/DesignSystem/**",
+        "Sources/Screens/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T013.md"
+    },
+    {
+      "id": "T014",
+      "title": "Measuring screen (full assembly)",
+      "status": "pending",
+      "dependsOn": [
+        "T007",
+        "T013"
+      ],
+      "gate": null,
+      "tags": [
+        "screen"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Screens/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T014.md"
+    },
+    {
+      "id": "T015",
+      "title": "Paused states: no-cellular fallback + consent-declined idle",
+      "status": "pending",
+      "dependsOn": [
+        "T014"
+      ],
+      "gate": null,
+      "tags": [
+        "screen"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Screens/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T015.md"
+    },
+    {
+      "id": "T016",
+      "title": "Live radio provider (CoreTelephony RAT mapping)",
+      "status": "pending",
+      "dependsOn": [
+        "T006",
+        "T009"
+      ],
+      "gate": null,
+      "tags": [
+        "live"
+      ],
+      "facets": {
+        "layer": "telephony",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Live/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T016.md"
+    },
+    {
+      "id": "T017",
+      "title": "Live cellular path monitor (NWPathMonitor)",
+      "status": "pending",
+      "dependsOn": [
+        "T006",
+        "T009"
+      ],
+      "gate": null,
+      "tags": [
+        "live"
+      ],
+      "facets": {
+        "layer": "networking",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Live/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T017.md"
+    },
+    {
+      "id": "T018",
+      "title": "HTTP probe support: request building, incremental response parsing, pacing (pure)",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "live",
+        "http"
+      ],
+      "facets": {
+        "layer": "networking",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Live/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T018.md"
+    },
+    {
+      "id": "T019",
+      "title": "Live cellular throughput sampler (NetworkConnection, forced .cellular)",
+      "status": "pending",
+      "dependsOn": [
+        "T006",
+        "T009",
+        "T018"
+      ],
+      "gate": null,
+      "tags": [
+        "live",
+        "sampler"
+      ],
+      "facets": {
+        "layer": "networking",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Live/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T019.md"
+    },
+    {
+      "id": "T020",
+      "title": "Accessibility: VoiceOver combined element, Dynamic Type, Reduce Motion audit",
+      "status": "pending",
+      "dependsOn": [
+        "T012",
+        "T014",
+        "T015"
+      ],
+      "gate": null,
+      "tags": [
+        "accessibility"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Screens/**",
+        "Sources/DesignSystem/**",
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T020.md"
+    },
+    {
+      "id": "T021",
+      "title": "XCUITest target + screen smoke tests (runs in CI)",
+      "status": "pending",
+      "dependsOn": [
+        "T012",
+        "T014",
+        "T015"
+      ],
+      "gate": null,
+      "tags": [
+        "testing"
+      ],
+      "facets": {
+        "layer": "build",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "project.yml",
+        "UITests/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T021.md"
+    },
+    {
+      "id": "T022",
+      "title": "App icon: headless generation script + asset catalog",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "assets"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "component",
+        "risk": []
+      },
+      "scope": [
+        "icontool/**",
+        "Sources/Assets.xcassets/**",
+        "project.yml"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "visualVerify": false,
+      "spec": ".harness/tasks/T022.md"
+    },
+    {
+      "id": "T023",
+      "title": "🔒 Human review: app icon quality",
+      "status": "pending",
+      "dependsOn": [
+        "T022"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "review"
+      ],
+      "scope": [],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T023.md"
+    },
+    {
+      "id": "T024",
+      "title": "Privacy manifest (PrivacyInfo.xcprivacy)",
+      "status": "pending",
+      "dependsOn": [
+        "T001"
+      ],
+      "gate": null,
+      "tags": [
+        "app-store"
+      ],
+      "facets": {
+        "layer": "build",
+        "workType": "config",
+        "risk": []
+      },
+      "scope": [
+        "Sources/PrivacyInfo.xcprivacy",
+        "project.yml"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T024.md"
+    },
+    {
+      "id": "T025",
+      "title": "🔒 Human gate: on-device end-to-end verification (real cellular, P0 background stop)",
+      "status": "pending",
+      "dependsOn": [
+        "T011",
+        "T012",
+        "T015",
+        "T016",
+        "T017",
+        "T019",
+        "T020"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "device",
+        "verification"
+      ],
+      "scope": [],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T025.md"
+    },
+    {
+      "id": "T026",
+      "title": "🔒 Human gate: design-fidelity review against the prototype",
+      "status": "pending",
+      "dependsOn": [
+        "T011",
+        "T012",
+        "T015",
+        "T020"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "review",
+        "design"
+      ],
+      "scope": [],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T026.md"
     }
   ]
 }

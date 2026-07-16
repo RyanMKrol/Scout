@@ -4,7 +4,8 @@
 Scout turns an iPhone into a live signal-finder you sweep around a room like a metal
 detector. It measures **real cellular throughput (Mbps)** — not "bars" — updates it ~4×
 per second, and labels the reading Great / Usable / Poor so a person can walk around and
-settle where usable speed actually is. The app is a focused, single-purpose instrument:
+settle where usable speed actually is. It measures **both download and upload**; download
+is the primary/hero metric, upload is shown as a secondary reading. The app is a focused, single-purpose instrument:
 no accounts, no history, no map. It opens and it is already measuring.
 
 **Chosen direction: "Sweep"** — a radar-style dial. This is what to build. The other
@@ -70,8 +71,9 @@ and home indicator are the system's own (shown by the device frame in the protot
     static sweep wedge at 20% opacity.
   - **Title** — "Scout uses cellular data to measure", 30pt bold, letter-spacing −0.6,
     line-height ~1.12, white, balanced wrap.
-  - **Body** — "To read real, usable speed, Scout transfers a little data over your cellular
-    connection while it's running.", 16pt, white 60%, line-height ~1.55.
+  - **Body** — "To read real, usable speed — both download and upload — Scout transfers a
+    little data over your cellular connection while it's running.", 16pt, white 60%,
+    line-height ~1.55.
   - **Three bullets** (accent-green 6pt dot + text, 15pt, white 72%, 18pt gap):
     1. "Roughly **10–40 MB per minute**, always shown on screen." (the MB figure white 100%, semibold, tabular)
     2. "Only while the screen is on and you're looking — never in the background."
@@ -91,21 +93,33 @@ and home indicator are the system's own (shown by the device frame in the protot
     quality color, opacity/scale pulse `scoutPulse` 1.6s ease-in-out infinite: 0.3/0.8 →
     1/1 → 0.3/0.8) + label "SWEEPING", 14pt semibold, letter-spacing 2.5, uppercase,
     white 50%.
-  - **Dial** — 288×288pt, centered. Layers:
+  - **Dial** — 288×288pt, centered. Two concentric arcs: outer = download, inner = upload.
+    Layers:
     - *Sweep wedge*: 258×258 circle, angular gradient (~92° of quality color) at 14%
       opacity, rotating 360° / **3.4s linear infinite**.
-    - *Track ring*: full circle, r 132pt, stroke 7pt, white 7%.
-    - *Progress arc*: r 132pt, stroke 7pt, round cap, quality color. Fills from the top
-      (start angle −90°) proportional to speed on a **log scale**:
-      `fraction = clamp(log10(mbps + 1) / log10(169), 0.04, 1)`. Animate arc length
+    - *Download track ring*: full circle, r 132pt, stroke 7pt, white 7%.
+    - *Download arc* (outer, primary): r 132pt, stroke 7pt, round cap, **quality color**.
+      Fills from the top (start angle −90°) proportional to download speed on a **log scale**:
+      `fraction = clamp(log10(downMbps + 1) / log10(169), 0.04, 1)`. Animate arc length
       changes over 0.28s linear, color over 0.45s ease.
-    - *Center stack*: generation label (e.g. "5G", 15pt weight 590, letter-spacing 2,
-      white 50%) → **hero number** (88pt, weight 600, letter-spacing −3, **tabular
-      figures**, quality color, color transitions 0.45s) → "Mbps" (18pt medium, white 55%).
+    - *Upload track ring*: r 100pt, stroke 6pt, white 6%.
+    - *Upload arc* (inner, secondary): r 100pt, stroke 6pt, round cap, **fixed cool blue**
+      `oklch(0.74 0.08 235)` (deliberately outside the quality hues so color only ever
+      signals download quality; the upload ring shows magnitude, not a judgement). Its own
+      log scale (upload tops out lower): `fraction = clamp(log10(upMbps + 1) / log10(65),
+      0.04, 1)`. Arc length transitions 0.28s linear; no color change.
+    - *Center stack*: generation label ("5G", 15pt weight 590, letter-spacing 2, white 50%)
+      → **hero download number** (80pt, weight 600, letter-spacing −3, **tabular figures**,
+      quality color, color transitions 0.45s) → a row "↓ Mbps down" (down-arrow glyph +
+      16pt medium, white 55%) → a secondary row "↑ n.n up" (up-arrow glyph + 19pt semibold
+      upload value in the cool blue `oklch(0.80 0.06 235)` + "up" 14pt at 70%). Both ↓/↑
+      glyphs are small stroked arrows (~11×13pt, 1.5pt stroke, round caps).
   - **Footer** (bottom, centered):
     - **Quality label** — "Great" / "Usable" / "Poor", 20pt semibold, quality color.
-    - **Session data counter** — down-arrow glyph + value + "this session". 15pt, tabular.
-      Value white 72%, suffix white 50%. Always visible; accumulates bytes transferred.
+    - **Session data counter** — split by direction on one row, 14pt tabular: "↓ nn MB down"
+      (value white 72%) · small dot separator · "↑ nn MB up" (in the cool blue), with a
+      "used this session" caption (12pt, white 32%) beneath. Always visible; accumulates
+      download and upload bytes separately.
 
 ### 4. No cellular (fallback)
 - **Purpose:** graceful, honest state when there's no cellular radio to read (Airplane
@@ -116,7 +130,8 @@ and home indicator are the system's own (shown by the device frame in the protot
   - Dial: track ring only (white 6%), no arc, no sweep. Center shows an em-dash "—"
     (96pt, weight 600, white 22%) over "Mbps" (white 35%).
   - Footer: "No cellular to measure" (20pt semibold, white 82%) + body "Scout measures your
-    **cellular** speed. Turn off Airplane Mode or Wi-Fi to start sweeping." (15pt, white 50%,
+    **cellular** speed — download and upload. Turn off Airplane Mode or Wi-Fi to start
+    sweeping." (15pt, white 50%,
     centered, max width ~280pt; the word "cellular" white 70% semibold).
 
 ## Interactions & behavior
@@ -146,14 +161,16 @@ and home indicator are the system's own (shown by the device frame in the protot
 - `firstRunConsentGiven: Bool` (persisted, e.g. `@AppStorage`).
 - `appPhase: .splash | .consent | .measuring` (routing).
 - Measuring session:
-  - `currentMbps: Double` (rolling-window throughput, updated 4Hz)
+  - `downMbps: Double` (rolling-window download throughput, updated 4Hz) — the hero number
+  - `upMbps: Double` (rolling-window upload throughput, updated 4Hz) — secondary
   - `generation: enum { fiveG, lte, threeG, unknown }`
-  - `sessionBytes: Int64` → format as MB for the counter
+  - `sessionDownBytes: Int64`, `sessionUpBytes: Int64` → format each as MB for the counter
   - `quality: enum { great, usable, poor }` derived from `currentMbps`
   - `cellularAvailable: Bool` → toggles No-cellular state
-- Measurement engine: repeatedly download from a throughput endpoint over the cellular
-  interface, time it, compute a rolling Mbps; accumulate bytes into `sessionBytes`. (Backend
-  choice is the dev's; none assumed for v1.)
+- Measurement engine: over the cellular interface, repeatedly transfer data and time it in
+  **both directions** — download from and upload to a throughput endpoint — computing a
+  rolling Mbps for each; accumulate bytes into `sessionDownBytes` / `sessionUpBytes`.
+  (Backend choice is the dev's; none assumed for v1.)
 
 ## Design tokens
 **Color**
@@ -164,6 +181,9 @@ and home indicator are the system's own (shown by the device frame in the protot
   - **Great (green):** `oklch(0.80 0.14 158)` ≈ `#3FD08A`-ish
   - **Usable (amber):** `oklch(0.82 0.13 82)` ≈ warm gold
   - **Poor (clay, not alarm-red):** `oklch(0.70 0.10 30)` ≈ muted terracotta
+  - **Upload accent (fixed, non-quality):** `oklch(0.74 0.08 235)` for the inner arc,
+    `oklch(0.80 0.06 235)` for the upload text — a calm cool blue kept clear of the quality
+    hues so color never conflates download quality with upload.
   - Brand/primary accent (splash, icon, buttons) = the Great green `oklch(0.80 0.14 158)`.
   - Convert with any OKLCH→sRGB tool and lock the hex in an asset catalog; keep the three
     quality colors equal in chroma/lightness so only hue signals meaning.

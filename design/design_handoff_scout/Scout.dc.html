@@ -47,7 +47,7 @@
             </svg>
           </div>
           <h2 style="margin:0;font-size:30px;font-weight:700;letter-spacing:-0.6px;line-height:1.12;color:#fff;text-wrap:balance;">Scout uses cellular data to measure</h2>
-          <p style="margin:16px 0 0;font-size:16px;line-height:1.55;color:rgba(255,255,255,0.6);text-wrap:pretty;">To read real, usable speed, Scout transfers a little data over your cellular connection while it’s running.</p>
+          <p style="margin:16px 0 0;font-size:16px;line-height:1.55;color:rgba(255,255,255,0.6);text-wrap:pretty;">To read real, usable speed — both download and upload — Scout transfers a little data over your cellular connection while it’s running.</p>
           <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
             <div style="display:flex;gap:13px;align-items:flex-start;">
               <span style="width:6px;height:6px;border-radius:50%;background:oklch(0.80 0.14 158);margin-top:8px;flex-shrink:0;"></span>
@@ -188,20 +188,37 @@
             <svg width="288" height="288" viewBox="0 0 288 288" style="position:absolute;inset:0;transform:rotate(-90deg);">
               <circle cx="144" cy="144" r="132" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7"></circle>
               <circle cx="144" cy="144" r="132" fill="none" stroke="{{ ringColor }}" stroke-width="7" stroke-linecap="round" stroke-dasharray="{{ ringDash2 }}" style="transition:stroke-dasharray .28s linear, stroke .45s ease;"></circle>
+              <circle cx="144" cy="144" r="100" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"></circle>
+              <circle cx="144" cy="144" r="100" fill="none" stroke="oklch(0.74 0.08 235)" stroke-width="6" stroke-linecap="round" stroke-dasharray="{{ ringDashUp }}" style="transition:stroke-dasharray .28s linear;"></circle>
             </svg>
             <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
               <span style="font-size:15px;font-weight:590;letter-spacing:2px;color:rgba(255,255,255,0.5);">{{ gen }}</span>
-              <span style="font-size:88px;line-height:0.9;font-weight:600;letter-spacing:-3px;font-variant-numeric:tabular-nums;color:{{ numberColor }};transition:color .45s ease;margin-top:6px;">{{ mbpsStr }}</span>
-              <span style="font-size:18px;font-weight:500;color:rgba(255,255,255,0.55);margin-top:4px;">Mbps</span>
+              <span style="font-size:80px;line-height:0.9;font-weight:600;letter-spacing:-3px;font-variant-numeric:tabular-nums;color:{{ numberColor }};transition:color .45s ease;margin-top:4px;">{{ mbpsStr }}</span>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:3px;color:rgba(255,255,255,0.55);">
+                <svg width="10" height="12" viewBox="0 0 10 12"><path d="M5 1v8M5 9.5 1.5 6M5 9.5 8.5 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span style="font-size:16px;font-weight:500;">Mbps down</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:12px;color:oklch(0.80 0.06 235);">
+                <svg width="10" height="12" viewBox="0 0 10 12"><path d="M5 11V3M5 2.5 1.5 6M5 2.5 8.5 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span style="font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;">{{ upStr }}</span>
+                <span style="font-size:14px;font-weight:500;opacity:0.7;">up</span>
+              </div>
             </div>
           </div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;color:rgba(255,255,255,0.5);">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:rgba(255,255,255,0.5);">
             <span style="font-size:20px;font-weight:600;letter-spacing:0.4px;color:{{ numberColor }};transition:color .45s ease;">{{ qlabel }}</span>
-            <div style="display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums;font-size:15px;">
-              <svg width="12" height="14" viewBox="0 0 13 14"><path d="M6.5 1v9M6.5 10.5 3 7M6.5 10.5 10 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              <span style="color:rgba(255,255,255,0.72);">{{ dataStr }}</span>
-              <span>this session</span>
+            <div style="display:flex;align-items:center;gap:16px;font-variant-numeric:tabular-nums;font-size:14px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <svg width="11" height="13" viewBox="0 0 11 13"><path d="M5.5 1v8.5M5.5 10 2 6.5M5.5 10 9 6.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span style="color:rgba(255,255,255,0.72);">{{ sessDn }}</span><span>down</span>
+              </div>
+              <span style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.28);"></span>
+              <div style="display:flex;align-items:center;gap:6px;color:oklch(0.80 0.06 235);">
+                <svg width="11" height="13" viewBox="0 0 11 13"><path d="M5.5 12V3.5M5.5 3 2 6.5M5.5 3 9 6.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span style="font-weight:600;">{{ sessUp }}</span><span style="opacity:0.7;">up</span>
+              </div>
             </div>
+            <span style="font-size:12px;letter-spacing:0.3px;color:rgba(255,255,255,0.32);">used this session</span>
           </div>
         </div>
       </x-import>
@@ -231,7 +248,7 @@
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 12px;">
             <span style="font-size:20px;font-weight:600;color:rgba(255,255,255,0.82);">No cellular to measure</span>
-            <p style="margin:0;font-size:15px;line-height:1.5;text-align:center;text-wrap:pretty;color:rgba(255,255,255,0.5);max-width:280px;">Scout measures your <strong style="color:rgba(255,255,255,0.7);font-weight:600;">cellular</strong> speed. Turn off Airplane Mode or Wi-Fi to start sweeping.</p>
+            <p style="margin:0;font-size:15px;line-height:1.5;text-align:center;text-wrap:pretty;color:rgba(255,255,255,0.5);max-width:280px;">Scout measures your <strong style="color:rgba(255,255,255,0.7);font-weight:600;">cellular</strong> speed — download and upload. Turn off Airplane Mode or Wi-Fi to start sweeping.</p>
           </div>
         </div>
       </x-import>
@@ -391,7 +408,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Live&quot;,&quot;Great&quot;,&quot;Usable&quot;,&quot;Poor&quot;],&quot;default&quot;:&quot;Live&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Review&quot;},&quot;showHonestNote&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;}}">
 class Component extends DCLogic {
-  state = { mbps: 58, gen: '5G', dataMB: 0, tick: 0 };
+  state = { mbps: 58, up: 9, gen: '5G', dnMB: 0, upMB: 0, tick: 0 };
 
   componentDidMount() { this._t = setInterval(() => this.tick(), 250); }
   componentWillUnmount() { clearInterval(this._t); }
@@ -414,7 +431,10 @@ class Component extends DCLogic {
       if (sc === 'Poor') { gen = gen === '3G' ? (Math.random() < 0.5 ? 'LTE' : '3G') : 'LTE'; if (Math.random() < 0.15) gen = '3G'; }
       else if (sc === 'Great') { gen = '5G'; }
       else if (Math.random() < 0.02) gen = gen === '5G' ? 'LTE' : '5G';
-      return { mbps: m, gen, dataMB: s.dataMB + m * 0.03125, tick: s.tick + 1 };
+      const upTarget = m * (0.14 + Math.random() * 0.14);
+      let up = s.up + (upTarget - s.up) * 0.3 + (Math.random() - 0.5) * 3;
+      up = Math.max(0.4, Math.min(64, up));
+      return { mbps: m, up, gen, dnMB: s.dnMB + m * 0.03125, upMB: s.upMB + up * 0.03125, tick: s.tick + 1 };
     });
   }
 
@@ -430,13 +450,21 @@ class Component extends DCLogic {
     const mbpsStr = m >= 10 ? Math.round(m).toString() : m.toFixed(1);
     const C = 2 * Math.PI * 128;
     const C2 = 2 * Math.PI * 132;
+    const C3 = 2 * Math.PI * 100;
+    const up = this.state.up;
+    const pctU = Math.max(0.04, Math.min(1, Math.log10(up + 1) / Math.log10(65)));
+    const upStr = up >= 10 ? Math.round(up).toString() : up.toFixed(1);
     const pct = Math.max(0.04, Math.min(1, Math.log10(m + 1) / Math.log10(169)));
+    const fmt = (v) => (v < 10 ? v.toFixed(1) : Math.round(v).toString()) + ' MB';
+    const dnMB = this.state.dnMB, upMB = this.state.upMB;
     return {
       T: true,
       honest: this.props.showHonestNote ?? true,
       mbpsStr,
       gen: this.state.gen,
-      dataStr: (this.state.dataMB < 10 ? this.state.dataMB.toFixed(1) : Math.round(this.state.dataMB).toString()) + ' MB',
+      dataStr: fmt(dnMB + upMB),
+      sessDn: fmt(dnMB),
+      sessUp: fmt(upMB),
       numberColor: color[q],
       ringColor: color[q],
       fieldBg: field[q],
@@ -444,6 +472,8 @@ class Component extends DCLogic {
       qlabel: label[q],
       ringDash: (C * pct).toFixed(1) + ' ' + C.toFixed(1),
       ringDash2: (C2 * pct).toFixed(1) + ' ' + C2.toFixed(1),
+      ringDashUp: (C3 * pctU).toFixed(1) + ' ' + C3.toFixed(1),
+      upStr,
     };
   }
 }
