@@ -1,7 +1,7 @@
 import Foundation
 
 enum ProbePacer {
-    static let interval: Duration = .milliseconds(500)
+    static let interval: Duration = .milliseconds(250)
 
     static func delayBeforeNextProbe(
         lastProbeStartedAt: ContinuousClock.Instant?,

@@ -37,17 +37,21 @@ final class HTTPProbeRequestTests: XCTestCase {
         XCTAssertEqual(delay, .zero)
     }
 
-    func testDelayBeforeNextProbeAt200MillisecondsIs300MillisecondsRemaining() {
+    func testDelayBeforeNextProbeAt100MillisecondsIs150MillisecondsRemaining() {
         let base = ContinuousClock().now
-        let now = base.advanced(by: .milliseconds(200))
+        let now = base.advanced(by: .milliseconds(100))
         let delay = ProbePacer.delayBeforeNextProbe(lastProbeStartedAt: base, now: now)
-        XCTAssertEqual(delay, .milliseconds(300))
+        XCTAssertEqual(delay, .milliseconds(150))
     }
 
     func testDelayBeforeNextProbeAtOrPastIntervalIsZero() {
         let base = ContinuousClock().now
-        let now = base.advanced(by: .milliseconds(500))
+        let now = base.advanced(by: .milliseconds(250))
         let delay = ProbePacer.delayBeforeNextProbe(lastProbeStartedAt: base, now: now)
         XCTAssertEqual(delay, .zero)
+    }
+
+    func testIntervalIsAtMost250Milliseconds() {
+        XCTAssertLessThanOrEqual(ProbePacer.interval, .milliseconds(250))
     }
 }

@@ -47,7 +47,7 @@ whether your phone can actually do anything where you're standing.
 - **Deliberately capped at realistic limits:** downloads capped at 10 Mbps (displayed "10+"),
   uploads capped at 5 Mbps (displayed "5+"). The product question is "is this spot good enough
   to load a video / send messages?" — not "how fast exactly" — so we measure with small paced
-  transfers (~256 KB) to keep total data use roughly **10–40 MB per minute**, matching the
+  transfers (~256 KB) to keep total data use roughly **30–60 MB per minute**, matching the
   consent copy.
 - **Quality bands** (download-driven): **Great** ≥ 6 Mbps, **Usable** ≥ 2 Mbps, **Poor** < 2 Mbps.
   Color + label always shown together.
@@ -70,7 +70,7 @@ whether your phone can actually do anything where you're standing.
    `requiredInterfaceType = .cellular` (iOS 26+). It transfers in both directions: measuring
    download from a remote server and upload back to it.
 2. **Paced, small transfers.** Rather than a continuous stream, Scout makes repeated small
-   transfers (~256 KB) at a measured pace, so total session data stays in the 10–40 MB/min range
+   transfers (~256 KB) at a measured pace, so total session data stays in the 30–60 MB/min range
    and feels respectful of a metered plan.
 3. **Rolling-window rate.** Bytes-per-interval are converted to Mbps over a short sliding
    window and pushed to the UI ~4× per second — smooth enough to feel real-time as you
@@ -96,7 +96,7 @@ Measuring throughput requires endpoints to transfer to/from.
 
 Because the measurement is an *active* data transfer, not a passive read:
 
-- **It uses cellular data.** Paced transfers stay roughly 10–40 MB per minute. Scout shows
+- **It uses cellular data.** Paced transfers stay roughly 30–60 MB per minute. Scout shows
   a **visible session data counter** and the first-run consent is explicit about data use and
   metered plans.
 - **Battery.** Sustained radio + screen use. Scout is a "run it for a couple of minutes
@@ -122,7 +122,7 @@ is already measuring (once first-run consent is given).
   session, always visible.
 - **Automatic measurement** — no Start/Stop buttons. The app measures whenever this screen is
   foreground; transfers stop immediately on background/lock.
-- A **first-run consent flow** that's honest: throughput (not bars), dual measurement, 10–40 MB/min
+- A **first-run consent flow** that's honest: throughput (not bars), dual measurement, 30–60 MB/min
   data budget, and the promise "only while the screen is on."
 - **Three screen states:** Splash (cold launch), First-run consent (once), Measuring (home), plus a
   fallback "No cellular" state for Airplane mode / Wi-Fi-only.
@@ -164,7 +164,7 @@ The app is in active development per the backlog below.
 - [ ] **Screens + flow:** Splash, first-run consent, Measuring (dual-arc radar dial), No-cellular
   fallback — all with motion, states, and accessibility.
 - [ ] **Live cellular providers:** swap the simulated sampler for real `NetworkConnection`
-  (download + upload over Cloudflare `__down` / `__up` endpoints, paced for 10–40 MB/min budget).
+  (download + upload over Cloudflare `__down` / `__up` endpoints, paced for 30–60 MB/min budget).
 - [ ] **Accessibility + UI tests:** Dynamic Type support, VoiceOver announcements, Reduce Motion,
   XCUITest coverage.
 - [ ] **Icon + App Store readiness:** app icon, Privacy Manifest, submission prep.

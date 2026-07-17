@@ -37,7 +37,7 @@ struct ConsentView: View {
                             bulletPoint(
                                 text: attributedBulletText(
                                     normal: "Roughly ",
-                                    bold: "10–40 MB per minute",
+                                    bold: "30–60 MB per minute",
                                     normalEnd: ", always shown on screen."
                                 )
                             )

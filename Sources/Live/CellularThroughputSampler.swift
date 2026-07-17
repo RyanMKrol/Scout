@@ -1,10 +1,18 @@
 import Foundation
 import Network
 
+/// Download-biased probe direction sequence: 3 download probes per 1 upload probe (every 4th
+/// probe is upload), so the hero download reading refreshes far more often than the upload figure.
+enum ProbeSchedule {
+    static func direction(forProbeIndex index: Int) -> TransferDirection {
+        (index + 1).isMultiple(of: 4) ? .upload : .download
+    }
+}
+
 /// Live measurement engine: forces every probe over `.cellular` via `NetworkConnection` (the only
-/// public API that can pin an interface) and alternates paced download/upload probes against
-/// Cloudflare's speed endpoints. Untestable in CI/Simulator (no cellular radio) — see the worklog
-/// for what only the device gate can verify.
+/// public API that can pin an interface) and runs a download-biased schedule of paced probes
+/// against Cloudflare's speed endpoints. Untestable in CI/Simulator (no cellular radio) — see the
+/// worklog for what only the device gate can verify.
 final class CellularThroughputSampler: ThroughputSampling {
     init() {}
 
@@ -12,7 +20,7 @@ final class CellularThroughputSampler: ThroughputSampling {
         AsyncStream { continuation in
             let task = Task {
                 var connection = Self.makeConnection()
-                var direction: TransferDirection = .download
+                var probeIndex = 0
                 var lastProbeStartedAt: ContinuousClock.Instant?
 
                 while !Task.isCancelled {
@@ -29,10 +37,11 @@ final class CellularThroughputSampler: ThroughputSampling {
                     guard !Task.isCancelled else { break }
 
                     lastProbeStartedAt = ContinuousClock().now
+                    let direction = ProbeSchedule.direction(forProbeIndex: probeIndex)
                     do {
                         let sample = try await Self.runProbe(direction: direction, on: connection)
                         continuation.yield(sample)
-                        direction = direction == .download ? .upload : .download
+                        probeIndex += 1
                     } catch {
                         connection = Self.makeConnection()
                         do {
