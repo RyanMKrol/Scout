@@ -996,7 +996,7 @@
     {
       "id": "T040",
       "title": "Wire up the 250ms display tick (specified 4Hz readout), decoupled from probe completion",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T037"
       ],
