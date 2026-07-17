@@ -229,7 +229,7 @@
     {
       "id": "T010",
       "title": "Animated primitives: SweepWedgeView + PulsingDot",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T003"
       ],
