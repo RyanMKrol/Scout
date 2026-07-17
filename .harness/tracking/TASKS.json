@@ -690,7 +690,7 @@
     {
       "id": "T028",
       "title": "RootView: routing UI, splash overlay, stub screens",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T003",
         "T008",
