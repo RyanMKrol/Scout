@@ -1020,6 +1020,57 @@
       "verify": [],
       "expectsTest": true,
       "spec": ".harness/tasks/T040.md"
+    },
+    {
+      "id": "T041",
+      "title": "SweepSession pause/resume: freeze the live reading on demand",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "measurement",
+        "app"
+      ],
+      "scope": [
+        "Sources/Domain/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T041.md",
+      "facets": {
+        "layer": "app",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      }
+    },
+    {
+      "id": "T042",
+      "title": "Tap the dial center to pause/resume the live sweep",
+      "status": "pending",
+      "dependsOn": [
+        "T041"
+      ],
+      "gate": null,
+      "tags": [
+        "ui"
+      ],
+      "scope": [
+        "Sources/Screens/**",
+        "Sources/DesignSystem/**",
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T042.md",
+      "facets": {
+        "layer": "ui",
+        "workType": "feature",
+        "risk": []
+      }
     }
   ]
 }
