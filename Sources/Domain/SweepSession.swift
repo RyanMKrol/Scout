@@ -17,8 +17,8 @@ public final class SweepSession {
     public private(set) var cellularAvailable: Bool = true
     public private(set) var isMeasuring: Bool = false
 
-    private var downloadWindow = ThroughputWindow(window: .seconds(2))
-    private var uploadWindow = ThroughputWindow(window: .seconds(2))
+    private var downloadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
+    private var uploadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
 
     private var sampleTask: Task<Void, Never>?
     private var radioTask: Task<Void, Never>?
@@ -91,8 +91,8 @@ public final class SweepSession {
 
     private func subscribeToSamples() {
         sampleTask?.cancel()
-        downloadWindow = ThroughputWindow(window: .seconds(2))
-        uploadWindow = ThroughputWindow(window: .seconds(2))
+        downloadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
+        uploadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
 
         sampleTask = Task { [weak self] in
             guard let self else {

@@ -203,6 +203,51 @@ final class ThroughputWindowTests: XCTestCase {
         XCTAssertNil(mbps)
     }
 
+    func testLiveWindowEvictsSampleOlderThanShortWindow() {
+        let base = ContinuousClock().now
+        var window = ThroughputWindow(window: ThroughputWindow.liveWindow)
+
+        let oldTime = base.advanced(by: ThroughputWindow.liveWindow * -1 - .milliseconds(50))
+        window.record(byteCount: 250_000, transferDuration: .milliseconds(200), endedAt: oldTime)
+
+        let freshTime = base
+        window.record(byteCount: 250_000, transferDuration: .milliseconds(200), endedAt: freshTime)
+
+        let mbps = window.megabitsPerSecond(at: freshTime)
+        XCTAssertNotNil(mbps)
+        if let mbps {
+            // Only the fresh sample should remain — the stale one fell outside the short window.
+            XCTAssertEqual(mbps, 10.0, accuracy: 0.001)
+        }
+    }
+
+    func testLiveWindowConvergesToNewThroughputWithinOneWindowSpan() {
+        let base = ContinuousClock().now
+        var window = ThroughputWindow(window: ThroughputWindow.liveWindow)
+
+        let sampleSpacing = Duration.milliseconds(100)
+        var time = base
+        for i in 0 ..< 10 {
+            time = base.advanced(by: sampleSpacing * i)
+            window.record(byteCount: 12500, transferDuration: .milliseconds(100), endedAt: time) // 1 Mbps
+        }
+
+        // Step change to much faster throughput; keep sampling slightly longer than one window span.
+        let stepStart = time
+        let samplesAfterStep = 8 // spans 800ms, > the 600ms liveWindow
+        for i in 1 ... samplesAfterStep {
+            time = stepStart.advanced(by: sampleSpacing * i)
+            window.record(byteCount: 1_250_000, transferDuration: .milliseconds(100), endedAt: time) // 100 Mbps
+        }
+
+        let mbps = window.megabitsPerSecond(at: time)
+        XCTAssertNotNil(mbps)
+        if let mbps {
+            // All pre-step slow samples have fallen out of the short window by now.
+            XCTAssertEqual(mbps, 100.0, accuracy: 5.0)
+        }
+    }
+
     func testSmallDurationLargeBytesHighMbps() {
         let base = ContinuousClock().now
         var window = ThroughputWindow(window: .seconds(2))

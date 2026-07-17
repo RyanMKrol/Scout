@@ -7,10 +7,14 @@ public struct ThroughputWindow: Sendable {
         let endedAt: ContinuousClock.Instant
     }
 
+    /// Recency window for the live-sweep reading: short enough that moving the phone to a new
+    /// spot is reflected within about a second, per T037.
+    public nonisolated static let liveWindow: Duration = .milliseconds(600)
+
     private var samples: [Sample] = []
     private let window: Duration
 
-    public nonisolated init(window: Duration = .seconds(2)) {
+    public nonisolated init(window: Duration = ThroughputWindow.liveWindow) {
         self.window = window
     }
 
