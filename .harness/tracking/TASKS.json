@@ -496,7 +496,7 @@
     {
       "id": "T020",
       "title": "Accessibility application: VoiceOver, Dynamic Type, Reduce Motion audit",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T012",
         "T014",
