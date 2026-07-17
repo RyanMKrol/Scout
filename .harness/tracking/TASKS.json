@@ -175,7 +175,7 @@
     {
       "id": "T008",
       "title": "AppRouter: app-phase state machine (pure)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T001"
       ],
