@@ -11,16 +11,23 @@ struct MeasuringStubView: View {
                 .ignoresSafeArea()
 
             if consentGiven, session.cellularAvailable {
-                Text(ScoutMeter.downloadDisplay(session.downloadMbps))
-                    .font(.system(size: 64, weight: .bold))
-                    .foregroundStyle(ScoutTheme.white(1.0))
-                    .accessibilityIdentifier("measuring.hero")
+                let content = DialContent(
+                    downDisplay: ScoutMeter.downloadDisplay(session.downloadMbps),
+                    upDisplay: ScoutMeter.uploadDisplay(session.uploadMbps),
+                    downFraction: ScoutMeter.downloadArcFraction(session.downloadMbps),
+                    upFraction: ScoutMeter.uploadArcFraction(session.uploadMbps),
+                    qualityColor: session.quality.color,
+                    generationText: session.generation.rawValue
+                )
+                DialCenterStack(mode: .live(content))
             } else {
                 VStack(spacing: 24) {
                     Text("PAUSED")
                         .font(.title)
                         .foregroundStyle(ScoutTheme.white(1.0))
                         .accessibilityIdentifier("paused.title")
+
+                    DialCenterStack(mode: .idle)
 
                     if !consentGiven {
                         Button("Start sweeping", action: onStart)
