@@ -774,7 +774,7 @@
     {
       "id": "T031",
       "title": "Dial building blocks: arrow glyphs + center stacks (live & idle)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T003",
         "T004",
