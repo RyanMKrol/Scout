@@ -969,7 +969,7 @@
     {
       "id": "T039",
       "title": "Staleness decay: dead spots read as dead (stop holding a stale healthy number)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
