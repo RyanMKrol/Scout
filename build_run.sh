@@ -71,7 +71,7 @@ xcrun simctl ui "$SIM" content_size large >/dev/null 2>&1 || true
 
 echo "▸ Installing + launching…"
 xcrun simctl install "$SIM" "$APP_PATH"
-xcrun simctl launch "$SIM" "$BUNDLE_ID"
+xcrun simctl launch "$SIM" "$BUNDLE_ID" ${SCOUT_LAUNCH_ARGS:-}
 
 mkdir -p "$SHOT_DIR"
 sleep 3   # let SwiftUI paint before capturing
