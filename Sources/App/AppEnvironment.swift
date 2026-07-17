@@ -8,13 +8,19 @@ enum AppEnvironment {
     static func makeSession() -> SweepSession {
         let scenario = scenario()
         return SweepSession(
-            // LIVE seam: CoreTelephony-backed sampler replaces this line in T017/T019.
-            sampler: SimulatedSampler(scenario: scenario),
-            // LIVE seam: CoreTelephony-backed radio provider replaces this line in T016.
+            sampler: sampler(scenario: scenario),
             radio: radioProvider(scenario: scenario),
-            // LIVE seam: NWPathMonitor-backed path monitor replaces this line in T017.
             path: pathProvider(scenario: scenario)
         )
+    }
+
+    private static func sampler(scenario: SimulationScenario) -> ThroughputSampling {
+        #if !targetEnvironment(simulator)
+            if scenario == .live {
+                return CellularThroughputSampler()
+            }
+        #endif
+        return SimulatedSampler(scenario: scenario)
     }
 
     private static func radioProvider(scenario: SimulationScenario) -> RadioInfoProviding {
