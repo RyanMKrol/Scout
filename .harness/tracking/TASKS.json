@@ -722,7 +722,7 @@
     {
       "id": "T029",
       "title": "Foreground-only lifecycle (P0) + screenshot launch-arg plumbing",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T028"
       ],
