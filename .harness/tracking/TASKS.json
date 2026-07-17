@@ -939,7 +939,7 @@
     {
       "id": "T038",
       "title": "Download-biased, tighter probing (fresh hero data 3-4x/sec) + honest data-budget copy",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
