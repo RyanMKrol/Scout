@@ -465,7 +465,7 @@
     {
       "id": "T019",
       "title": "Live cellular throughput sampler (NetworkConnection, forced .cellular)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T006",
         "T009",
