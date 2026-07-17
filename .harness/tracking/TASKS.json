@@ -146,7 +146,7 @@
     {
       "id": "T007",
       "title": "SweepSession: observable measurement session engine (P0 stop-on-background contract)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T005",
         "T006"
