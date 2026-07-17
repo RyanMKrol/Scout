@@ -361,7 +361,7 @@
     {
       "id": "T015",
       "title": "Paused states: no-cellular fallback + consent-declined idle",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T014"
       ],
