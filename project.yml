@@ -50,12 +50,26 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.scout.tests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+  ScoutUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: Scout
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.scout.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 schemes:
   Scout:
     build:
       targets:
         Scout: all
         ScoutTests: [test]
+        ScoutUITests: [test]
     test:
       targets:
         - ScoutTests
+        - ScoutUITests
