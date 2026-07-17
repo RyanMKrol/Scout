@@ -913,7 +913,7 @@
     {
       "id": "T037",
       "title": "Short recency-weighted throughput window (live responsiveness)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
