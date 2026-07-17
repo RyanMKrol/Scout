@@ -413,7 +413,7 @@
     {
       "id": "T017",
       "title": "Live cellular path monitor (NWPathMonitor)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T006",
         "T009"
