@@ -552,7 +552,7 @@
     {
       "id": "T022",
       "title": "App icon: headless generation script + asset catalog",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T001"
       ],

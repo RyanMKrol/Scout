@@ -1,0 +1,2 @@
+{"id":"T022","ts":"2026-07-17T03:08:20Z","kind":"audit-fail","rung":0,"attempt":0,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"ui","workType":"component","risk":[]},"detail":""}
+{"id":"T022","ts":"2026-07-17T03:19:41Z","kind":"audit-fail","rung":0,"attempt":1,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"ui","workType":"component","risk":[]},"detail":""}
