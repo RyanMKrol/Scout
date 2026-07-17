@@ -664,7 +664,7 @@
     {
       "id": "T027",
       "title": "Simulated providers (scripted async streams)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T006"
       ],
