@@ -5,10 +5,13 @@ struct SplashStubView: View {
         ZStack {
             ScoutTheme.background
                 .ignoresSafeArea()
-            Text("Scout")
-                .font(.largeTitle)
-                .foregroundStyle(ScoutTheme.white(1.0))
-                .accessibilityIdentifier("splash.wordmark")
+            VStack(spacing: 20) {
+                RadarMarkView(style: .splash)
+                Text("Scout")
+                    .font(.largeTitle)
+                    .foregroundStyle(ScoutTheme.white(1.0))
+                    .accessibilityIdentifier("splash.wordmark")
+            }
         }
     }
 }
