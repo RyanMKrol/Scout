@@ -802,7 +802,7 @@
     {
       "id": "T032",
       "title": "HTTP probe requests + probe pacing (pure)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T001"
       ],
