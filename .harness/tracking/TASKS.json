@@ -19,7 +19,7 @@
     {
       "id": "T002",
       "title": "README truth-up: align concept doc with the settled v1 design (design folder is source of truth)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T001"
       ],
