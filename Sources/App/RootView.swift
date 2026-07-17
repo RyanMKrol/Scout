@@ -27,7 +27,7 @@ struct RootView: View {
         ZStack {
             switch router.phase {
             case .splash:
-                SplashStubView()
+                SplashView()
             case .consent:
                 ConsentStubView(
                     onStart: {
@@ -50,7 +50,7 @@ struct RootView: View {
             }
 
             if router.phase == .splash {
-                SplashStubView()
+                SplashView()
                     .zIndex(1)
                     .transition(.opacity)
             }
