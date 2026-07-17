@@ -525,7 +525,7 @@
     {
       "id": "T021",
       "title": "XCUITest target + screen smoke tests (runs in CI)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T012",
         "T014",
