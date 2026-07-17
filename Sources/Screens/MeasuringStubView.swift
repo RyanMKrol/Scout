@@ -19,7 +19,7 @@ struct MeasuringStubView: View {
                     qualityColor: session.quality.color,
                     generationText: session.generation.rawValue
                 )
-                DialCenterStack(mode: .live(content))
+                SweepDialView(mode: .live(content))
             } else {
                 VStack(spacing: 24) {
                     Text("PAUSED")
@@ -27,7 +27,7 @@ struct MeasuringStubView: View {
                         .foregroundStyle(ScoutTheme.white(1.0))
                         .accessibilityIdentifier("paused.title")
 
-                    DialCenterStack(mode: .idle)
+                    SweepDialView(mode: .idle)
 
                     if !consentGiven {
                         Button("Start sweeping", action: onStart)
