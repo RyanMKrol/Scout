@@ -439,7 +439,7 @@
     {
       "id": "T018",
       "title": "Incremental HTTP/1.1 response parser (pure)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T001"
       ],
