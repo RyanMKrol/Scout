@@ -909,6 +909,117 @@
       "design": null,
       "verify": [],
       "spec": ".harness/tasks/T036.md"
+    },
+    {
+      "id": "T037",
+      "title": "Short recency-weighted throughput window (live responsiveness)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "responsiveness"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Domain/**",
+        "Tests/ThroughputWindowTests.swift",
+        "Tests/SweepSessionTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T037.md"
+    },
+    {
+      "id": "T038",
+      "title": "Download-biased, tighter probing (fresh hero data 3-4x/sec) + honest data-budget copy",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "responsiveness"
+      ],
+      "facets": {
+        "layer": "networking",
+        "workType": "feature",
+        "risk": [
+          "touches-core",
+          "cross-cutting"
+        ]
+      },
+      "scope": [
+        "Sources/Live/**",
+        "Sources/Screens/ConsentView.swift",
+        "README.md",
+        "Tests/HTTPProbeRequestTests.swift",
+        "Tests/SweepSessionTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "visualVerify": true,
+      "spec": ".harness/tasks/T038.md"
+    },
+    {
+      "id": "T039",
+      "title": "Staleness decay: dead spots read as dead (stop holding a stale healthy number)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "responsiveness"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Domain/**",
+        "Sources/Screens/MeasuringView.swift",
+        "Tests/SweepSessionTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "visualVerify": true,
+      "spec": ".harness/tasks/T039.md"
+    },
+    {
+      "id": "T040",
+      "title": "Wire up the 250ms display tick (specified 4Hz readout), decoupled from probe completion",
+      "status": "pending",
+      "dependsOn": [
+        "T037"
+      ],
+      "gate": null,
+      "tags": [
+        "responsiveness"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Domain/**",
+        "Sources/DesignSystem/ScoutTheme.swift",
+        "Tests/SweepSessionTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T040.md"
     }
   ]
 }
