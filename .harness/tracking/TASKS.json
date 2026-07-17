@@ -335,7 +335,7 @@
     {
       "id": "T014",
       "title": "Measuring screen (full assembly)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T007",
         "T013"
