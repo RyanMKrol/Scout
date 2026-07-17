@@ -1049,7 +1049,7 @@
     {
       "id": "T042",
       "title": "Tap the dial center to pause/resume the live sweep",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [
         "T041"
       ],
