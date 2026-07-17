@@ -748,7 +748,7 @@
     {
       "id": "T030",
       "title": "RadarMarkView (splash + consent variants), shown on the splash stub",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T010",
         "T029"
