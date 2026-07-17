@@ -11,10 +11,19 @@ enum AppEnvironment {
             // LIVE seam: CoreTelephony-backed sampler replaces this line in T017/T019.
             sampler: SimulatedSampler(scenario: scenario),
             // LIVE seam: CoreTelephony-backed radio provider replaces this line in T016.
-            radio: SimulatedRadioProvider(scenario: scenario),
+            radio: radioProvider(scenario: scenario),
             // LIVE seam: NWPathMonitor-backed path monitor replaces this line in T017.
             path: SimulatedPathMonitor(scenario: scenario)
         )
+    }
+
+    private static func radioProvider(scenario: SimulationScenario) -> RadioInfoProviding {
+        #if !targetEnvironment(simulator)
+            if scenario == .live {
+                return CoreTelephonyRadioProvider()
+            }
+        #endif
+        return SimulatedRadioProvider(scenario: scenario)
     }
 
     /// Parses UserDefaults "ScoutScenario" (auto-populated by a `-ScoutScenario <value>` launch
