@@ -10,6 +10,9 @@ public final class SweepSession {
     /// How long the stale reading takes to fade to zero once past the threshold.
     public nonisolated static let stalenessDecayDuration: Duration = .milliseconds(1000)
     private nonisolated static let stalenessPollInterval: Duration = .milliseconds(100)
+    /// The displayed reading's refresh cadence, decoupled from probe completion: ~4Hz per the
+    /// design spec. Sourced from `ScoutMotion.tickInterval` so the two stay in lockstep.
+    private nonisolated static let tickInterval: Duration = .seconds(ScoutMotion.tickInterval)
 
     private let sampler: any ThroughputSampling
     private let radio: any RadioInfoProviding
@@ -37,6 +40,7 @@ public final class SweepSession {
     private var radioTask: Task<Void, Never>?
     private var pathTask: Task<Void, Never>?
     private var stalenessTask: Task<Void, Never>?
+    private var tickTask: Task<Void, Never>?
 
     public init(
         sampler: any ThroughputSampling,
@@ -60,7 +64,18 @@ public final class SweepSession {
             subscribeToSamples()
         }
 
-        radioTask = Task { [weak self] in
+        radioTask = startRadioTask()
+        pathTask = startPathTask()
+        stalenessTask = startPollingTask(interval: Self.stalenessPollInterval) { [weak self] in
+            self?.evaluateStaleness()
+        }
+        tickTask = startPollingTask(interval: Self.tickInterval) { [weak self] in
+            self?.republishFromWindow()
+        }
+    }
+
+    private func startRadioTask() -> Task<Void, Never> {
+        Task { [weak self] in
             guard let self else {
                 return
             }
@@ -68,8 +83,10 @@ public final class SweepSession {
                 self.generation = generation
             }
         }
+    }
 
-        pathTask = Task { [weak self] in
+    private func startPathTask() -> Task<Void, Never> {
+        Task { [weak self] in
             guard let self else {
                 return
             }
@@ -77,17 +94,16 @@ public final class SweepSession {
                 handlePathUpdate(available: available)
             }
         }
+    }
 
-        stalenessTask = Task { [weak self] in
-            guard let self else {
-                return
-            }
+    private func startPollingTask(interval: Duration, work: @escaping @MainActor () -> Void) -> Task<Void, Never> {
+        Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: Self.stalenessPollInterval)
+                try? await Task.sleep(for: interval)
                 guard !Task.isCancelled else {
                     break
                 }
-                evaluateStaleness()
+                work()
             }
         }
     }
@@ -101,6 +117,8 @@ public final class SweepSession {
         pathTask = nil
         stalenessTask?.cancel()
         stalenessTask = nil
+        tickTask?.cancel()
+        tickTask = nil
         isMeasuring = false
         isStalled = false
         lastSampleAt = nil
@@ -168,6 +186,26 @@ public final class SweepSession {
         lastSampleAt = now()
         downloadMbpsAtLastSample = downloadMbps
         uploadMbpsAtLastSample = uploadMbps
+    }
+
+    /// Recomputes the rolling-window Mbps and republishes it, independent of probe arrival, so
+    /// the displayed value eases as samples age out of the window rather than only updating once
+    /// per probe. Skipped once `evaluateStaleness()` has taken over fading the reading to zero.
+    private func republishFromWindow() {
+        guard isMeasuring, cellularAvailable, !isStalled else {
+            return
+        }
+
+        let at = now()
+
+        if let value = downloadWindow.megabitsPerSecond(at: at) {
+            downloadMbps = min(value, ScoutMeter.downloadCapMbps)
+            quality = SignalQuality(downloadMbps: downloadMbps)
+        }
+
+        if let value = uploadWindow.megabitsPerSecond(at: at) {
+            uploadMbps = min(value, ScoutMeter.uploadCapMbps)
+        }
     }
 
     private func evaluateStaleness() {

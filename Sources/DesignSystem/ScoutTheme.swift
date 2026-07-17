@@ -72,5 +72,5 @@ enum ScoutMotion {
 
     /// Throughput reading cadence: 0.25s (~4 Hz).
     /// The rolling-window Mbps is recomputed and pushed to the UI at this interval.
-    static let tickInterval: Double = 0.25
+    nonisolated static let tickInterval: Double = 0.25
 }

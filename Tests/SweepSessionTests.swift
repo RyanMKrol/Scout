@@ -263,6 +263,56 @@ final class SweepSessionTests: XCTestCase {
         session.stop()
     }
 
+    func testTickRepublishesFromWindowBetweenProbesAndStopsAfterStop() async {
+        let sampler = FakeThroughputSampler()
+        let radio = FakeRadioInfoProvider()
+        let path = FakeCellularPathMonitor()
+        let clock = ManualClock()
+        let session = SweepSession(sampler: sampler, radio: radio, path: path, now: clock.now)
+        let start = clock.now()
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        // Two samples land close together: an older one at `start` and a newer, faster one
+        // 300ms later. Both are resident in the (600ms) window, so the published rate is their
+        // combined average.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 50000, transferDuration: .milliseconds(100),
+                endedAt: start
+            )
+        )
+        await waitUntil { session.downloadMbps > 0 }
+
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 100_000, transferDuration: .milliseconds(100),
+                endedAt: start.advanced(by: .milliseconds(300))
+            )
+        )
+        await waitUntil { session.downloadMbps > 4.0 }
+        XCTAssertEqual(session.downloadMbps, 6.0, accuracy: 0.001)
+
+        // No new probe arrives. Advance the injected clock (well under the staleness threshold)
+        // so the older sample ages out of the window; the next tick should recompute from the
+        // window's remaining sample and republish, without any fresh probe.
+        clock.advance(by: .milliseconds(650))
+        XCTAssertLessThan(clock.now() - start, SweepSession.stalenessThreshold)
+
+        await waitUntil { session.downloadMbps > 6.5 }
+        XCTAssertEqual(session.downloadMbps, 8.0, accuracy: 0.001)
+        XCTAssertFalse(session.isStalled)
+
+        session.stop()
+
+        // Once stopped, the tick must be torn down: advancing well past the window again and
+        // waiting must NOT change the published value any further.
+        clock.advance(by: .milliseconds(650))
+        try? await Task.sleep(for: .milliseconds(400))
+        XCTAssertEqual(session.downloadMbps, 8.0, accuracy: 0.001)
+    }
+
     func testCellularAvailableAgainResubscribesSampler() async {
         let sampler = FakeThroughputSampler()
         let radio = FakeRadioInfoProvider()
