@@ -39,7 +39,7 @@ struct RootView: View {
                     }
                 )
             case .measuring:
-                MeasuringStubView(
+                MeasuringView(
                     session: session,
                     consentGiven: router.consentGiven && !forceIdle,
                     onStart: {
