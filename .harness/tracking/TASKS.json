@@ -93,7 +93,7 @@
     {
       "id": "T005",
       "title": "Rolling throughput window (pure, transfer-time-weighted)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T001"
       ],
