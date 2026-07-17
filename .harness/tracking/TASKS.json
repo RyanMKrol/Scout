@@ -595,7 +595,7 @@
     {
       "id": "T024",
       "title": "Privacy manifest (PrivacyInfo.xcprivacy)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T001"
       ],
