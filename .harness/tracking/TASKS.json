@@ -280,7 +280,7 @@
     {
       "id": "T012",
       "title": "First-run consent screen (full fidelity)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T029",
         "T030"
