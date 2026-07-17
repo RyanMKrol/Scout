@@ -333,4 +333,56 @@ final class SweepSessionTests: XCTestCase {
 
         session.stop()
     }
+
+    func testPauseFreezesReadingAndResumeRestoresLiveUpdating() async {
+        let sampler = FakeThroughputSampler()
+        let radio = FakeRadioInfoProvider()
+        let path = FakeCellularPathMonitor()
+        let session = SweepSession(sampler: sampler, radio: radio, path: path)
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 100_000, transferDuration: .milliseconds(200),
+                endedAt: ContinuousClock().now
+            )
+        )
+        await waitUntil { session.downloadMbps > 0 }
+        let frozenValue = session.downloadMbps
+        XCTAssertEqual(frozenValue, 4.0, accuracy: 0.001)
+
+        session.pause()
+        XCTAssertTrue(session.isPaused)
+        await waitUntil { sampler.terminatedCount == 1 }
+        XCTAssertEqual(sampler.terminatedCount, 1)
+
+        // A sample yielded after pause must not reach the (torn-down) subscription, and the
+        // displayed value must stay frozen at its last value.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 900_000, transferDuration: .milliseconds(200),
+                endedAt: ContinuousClock().now
+            )
+        )
+        try? await Task.sleep(for: .milliseconds(300))
+        XCTAssertEqual(session.downloadMbps, frozenValue, accuracy: 0.001)
+        XCTAssertTrue(session.isMeasuring)
+
+        session.resume()
+        XCTAssertFalse(session.isPaused)
+        await waitUntil { sampler.subscribeCount == 2 }
+
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 900_000, transferDuration: .milliseconds(200),
+                endedAt: ContinuousClock().now
+            )
+        )
+        await waitUntil { session.downloadMbps > frozenValue }
+        XCTAssertGreaterThan(session.downloadMbps, frozenValue)
+
+        session.stop()
+    }
 }

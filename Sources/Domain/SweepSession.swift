@@ -28,6 +28,7 @@ public final class SweepSession {
     public private(set) var cellularAvailable: Bool = true
     public private(set) var isMeasuring: Bool = false
     public private(set) var isStalled: Bool = false
+    public private(set) var isPaused: Bool = false
 
     private var downloadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
     private var uploadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
@@ -121,19 +122,56 @@ public final class SweepSession {
         tickTask = nil
         isMeasuring = false
         isStalled = false
+        isPaused = false
         lastSampleAt = nil
+    }
+
+    /// Suspends sample consumption without stopping the session: the sampler subscription is
+    /// torn down and the last-displayed download/upload/quality/generation values are held as a
+    /// frozen snapshot rather than zeroed, distinct from stop()'s full teardown and from the
+    /// no-cellular empty state.
+    public func pause() {
+        guard isMeasuring, !isPaused else {
+            return
+        }
+        isPaused = true
+        sampleTask?.cancel()
+        sampleTask = nil
+    }
+
+    /// Resumes live updating after pause(), re-subscribing to samples exactly as start() does
+    /// when cellular is available.
+    public func resume() {
+        guard isMeasuring, isPaused else {
+            return
+        }
+        isPaused = false
+        if cellularAvailable {
+            subscribeToSamples()
+        }
+    }
+
+    public func togglePause() {
+        if isPaused {
+            resume()
+        } else {
+            pause()
+        }
     }
 
     private func handlePathUpdate(available: Bool) {
         cellularAvailable = available
 
         if available {
-            if isMeasuring {
+            if isMeasuring, !isPaused {
                 subscribeToSamples()
             }
         } else {
             sampleTask?.cancel()
             sampleTask = nil
+            guard !isPaused else {
+                return
+            }
             downloadMbps = 0
             uploadMbps = 0
             quality = SignalQuality(downloadMbps: downloadMbps)
@@ -192,7 +230,7 @@ public final class SweepSession {
     /// the displayed value eases as samples age out of the window rather than only updating once
     /// per probe. Skipped once `evaluateStaleness()` has taken over fading the reading to zero.
     private func republishFromWindow() {
-        guard isMeasuring, cellularAvailable, !isStalled else {
+        guard isMeasuring, cellularAvailable, !isStalled, !isPaused else {
             return
         }
 
@@ -209,7 +247,7 @@ public final class SweepSession {
     }
 
     private func evaluateStaleness() {
-        guard isMeasuring, cellularAvailable, let lastSampleAt else {
+        guard isMeasuring, cellularAvailable, !isPaused, let lastSampleAt else {
             return
         }
 
