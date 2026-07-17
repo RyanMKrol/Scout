@@ -13,7 +13,7 @@ enum AppEnvironment {
             // LIVE seam: CoreTelephony-backed radio provider replaces this line in T016.
             radio: radioProvider(scenario: scenario),
             // LIVE seam: NWPathMonitor-backed path monitor replaces this line in T017.
-            path: SimulatedPathMonitor(scenario: scenario)
+            path: pathProvider(scenario: scenario)
         )
     }
 
@@ -24,6 +24,15 @@ enum AppEnvironment {
             }
         #endif
         return SimulatedRadioProvider(scenario: scenario)
+    }
+
+    private static func pathProvider(scenario: SimulationScenario) -> CellularPathMonitoring {
+        #if !targetEnvironment(simulator)
+            if scenario == .live {
+                return CellularPathMonitor()
+            }
+        #endif
+        return SimulatedPathMonitor(scenario: scenario)
     }
 
     /// Parses UserDefaults "ScoutScenario" (auto-populated by a `-ScoutScenario <value>` launch
