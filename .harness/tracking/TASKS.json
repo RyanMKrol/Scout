@@ -118,7 +118,7 @@
     {
       "id": "T006",
       "title": "Measurement seams (frozen protocols) + scenario-walk math (pure)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T004"
       ],
