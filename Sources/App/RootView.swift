@@ -29,7 +29,7 @@ struct RootView: View {
             case .splash:
                 SplashView()
             case .consent:
-                ConsentStubView(
+                ConsentView(
                     onStart: {
                         router.startSweeping()
                         session.start()
