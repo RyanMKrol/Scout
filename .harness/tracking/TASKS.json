@@ -386,7 +386,7 @@
     {
       "id": "T016",
       "title": "Live radio provider (CoreTelephony RAT mapping)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T006",
         "T009"
