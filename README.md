@@ -33,9 +33,8 @@ There are two different things people mean by "signal":
 | **Cellular throughput** (Mbps) | How much data actually moves over the cellular link right now | **Yes** — by actively transferring data over the cellular interface and measuring the rate. |
 
 Scout is built on the second one. It **cannot** show you a raw dBm/bars number — no
-App-Store-safe iOS app can. Instead it measures **effective throughput to the tower** by
-pulling a data stream *specifically over the cellular radio* and timing how fast it
-arrives.
+App-Store-safe iOS app can. Instead it measures **effective throughput over the cellular radio** by
+actively transferring data (both download and upload) and timing how fast it moves.
 
 For the "find the good spot" use case this is arguably the *better* metric anyway: bars
 can read full while the connection is unusable, but measured Mbps is the ground truth of
@@ -43,67 +42,90 @@ whether your phone can actually do anything where you're standing.
 
 ### What we *can* surface
 
-- **Live throughput in Mbps**, updated ~4× per second on a rolling window.
+- **Live throughput in Mbps** — both download (hero metric) and upload (secondary) — updated
+  ~4× per second on a rolling window.
+- **Deliberately capped at realistic limits:** downloads capped at 10 Mbps (displayed "10+"),
+  uploads capped at 5 Mbps (displayed "5+"). The product question is "is this spot good enough
+  to load a video / send messages?" — not "how fast exactly" — so we measure with small paced
+  transfers (~256 KB) to keep total data use roughly **10–40 MB per minute**, matching the
+  consent copy.
+- **Quality bands** (download-driven): **Great** ≥ 6 Mbps, **Usable** ≥ 2 Mbps, **Poor** < 2 Mbps.
+  Color + label always shown together.
 - **Radio generation** — whether you're currently on **5G NR, LTE, 3G**, etc., via
-  `CoreTelephony`. So the readout reads e.g. **"5G · 84 Mbps"**.
-- **Trend / history** while you move — a rolling graph so you can see the number climb as
-  you find a better spot.
+  `CoreTelephony`. So the readout reads e.g. **"5G · 10+ Mbps"** with a quality label.
 
 ### What we deliberately *cannot* surface
 
 - Raw signal strength (dBm), bars, RSRP/RSRQ — **not available to third-party apps.**
 - Anything about *why* signal is weak (tower distance, band, congestion) — invisible to us.
+- Trend history or stored measurements — Scout measures in-session only, no persistence.
 
 ---
 
 ## How it works
 
-1. **Forced cellular transfer.** Scout opens a connection bound to the **cellular
+1. **Forced cellular transfer, both directions.** Scout opens connections bound to the **cellular
    interface only** (even if Wi-Fi is connected) so the measurement reflects the mobile
    signal, not your router. Uses `Network.framework`'s `NetworkConnection` with
-   `requiredInterfaceType = .cellular` (iOS 26+).
-2. **Continuous download stream.** It pulls bytes from a high-bandwidth endpoint and
-   counts them.
+   `requiredInterfaceType = .cellular` (iOS 26+). It transfers in both directions: measuring
+   download from a remote server and upload back to it.
+2. **Paced, small transfers.** Rather than a continuous stream, Scout makes repeated small
+   transfers (~256 KB) at a measured pace, so total session data stays in the 10–40 MB/min range
+   and feels respectful of a metered plan.
 3. **Rolling-window rate.** Bytes-per-interval are converted to Mbps over a short sliding
    window and pushed to the UI ~4× per second — smooth enough to feel real-time as you
    walk.
 4. **Radio label.** `CoreTelephony`'s current radio-access-technology is read alongside so
    the number is tagged with 5G / LTE / etc.
-5. **Sweep the room.** You move; the number moves; you stop where it's highest.
+5. **Foreground-only.** The moment the app backgrounds, all transfers stop immediately.
+   No background measurement of any kind — this is a foreground, screen-on experience by design.
+6. **Sweep the room.** You move; the number moves; you stop where it's highest.
 
 ### Data source
 
-Measuring throughput requires downloading *from somewhere*.
+Measuring throughput requires endpoints to transfer to/from.
 
-- **v1:** pull from a **public high-bandwidth endpoint** (e.g. a Cloudflare speed
-  endpoint) — zero backend to run, instant to prototype.
+- **v1:** pull from **Cloudflare's public speed endpoints** (`https://speed.cloudflare.com/__down?bytes=N`
+  for download, `/__up` for upload) — zero backend to run, instant to prototype.
 - **Later:** a **small self-hosted streaming server** for tighter control, consistent
   results, and no dependency on a third party.
 
 ---
 
-## Trade-offs to design around
+## Trade-offs and P0 rules
 
 Because the measurement is an *active* data transfer, not a passive read:
 
-- **It uses cellular data.** A continuous stream burns through your data plan. Scout needs
-  a clear **start/stop**, a visible **data-used counter**, and a warning before it runs on
-  a metered plan.
+- **It uses cellular data.** Paced transfers stay roughly 10–40 MB per minute. Scout shows
+  a **visible session data counter** and the first-run consent is explicit about data use and
+  metered plans.
 - **Battery.** Sustained radio + screen use. Scout is a "run it for a couple of minutes
   while I find the spot" tool, not a background monitor.
-- **No background running.** Throughput can only be measured while actively transferring;
-  this is a foreground, screen-on experience by design.
+- **P0 rule — no background running.** The moment the app leaves the foreground (backgrounded,
+  app switcher, screen lock), **ALL data transfers stop immediately**. No background mode,
+  no widget, no lock-screen — this is a foreground, screen-on experience by design. This rule
+  is non-negotiable for user trust.
 
 ---
 
 ## Core UX
 
-- A big, glanceable **live Mbps readout** you can see from arm's length while walking.
-- The **radio generation** beside it (5G · / LTE ·).
-- A **rolling trend graph** so you can see improvement as you move.
-- Clear **Start / Stop** and a **session data-used** counter, always visible.
-- A first-run explainer that's honest about *what* is being measured (throughput, not bars)
-  and that it uses cellular data.
+Scout is a focused, single-purpose instrument: **no accounts, no history, no map.** It opens and
+is already measuring (once first-run consent is given).
+
+- A big, glanceable **live dual-arc dial** with download (outer, hero) and upload (inner, secondary)
+  throughput — visible from arm's length while walking.
+- The **radio generation** labeled (5G · / LTE ·).
+- A **quality label** (Great / Usable / Poor, download-driven) pinned to the bottom, color + label
+  always together.
+- A **session data counter** (split download/upload, in MB) showing total bytes transferred this
+  session, always visible.
+- **Automatic measurement** — no Start/Stop buttons. The app measures whenever this screen is
+  foreground; transfers stop immediately on background/lock.
+- A **first-run consent flow** that's honest: throughput (not bars), dual measurement, 10–40 MB/min
+  data budget, and the promise "only while the screen is on."
+- **Three screen states:** Splash (cold launch), First-run consent (once), Measuring (home), plus a
+  fallback "No cellular" state for Airplane mode / Wi-Fi-only.
 
 ---
 
@@ -119,21 +141,34 @@ Because the measurement is an *active* data transfer, not a passive read:
 
 ---
 
+## Design source of truth
+
+The authoritative design is in **`design/design_handoff_scout/`** — both the HTML prototype
+(`Scout.dc.html`) and this README. The v1 app recreates those designs natively in SwiftUI
+(iOS 26+), using system materials, SF Pro, and standard iOS patterns. Where the HTML uses
+web techniques, the implementation uses SwiftUI equivalents (e.g. `Canvas` / `TimelineView` for
+the rotating sweep, `Circle().trim()` for the arc).
+
+---
+
 ## Status
 
-Early — this README captures the concept and the key technical constraints. No app code
-yet.
+The app is in active development per the backlog below.
 
-### Roadmap (rough)
+### Roadmap (phases)
 
-- [ ] Cellular-bound throughput sampler (forced `.cellular` interface)
-- [ ] Rolling-window Mbps calculation, ~4 Hz UI updates
-- [ ] Radio-generation label via CoreTelephony
-- [ ] Live readout + trend graph UI
-- [ ] Start/stop + data-used counter + metered-plan warning
-- [ ] First-run explainer (honest about throughput-vs-bars)
-- [ ] Decide data source: public endpoint → self-hosted server
-- [x] Minimum deployment target: **iOS 26**
+- [ ] **Foundation:** cellular-bound dual-direction (download + upload) throughput sampler with
+  rolling-window Mbps calculation, ~4×/sec UI updates, radio-generation label via CoreTelephony.
+- [ ] **Simulated measurement engine:** a scripted fake for unit testing the windowing math and
+  quality-band logic without touching the live radio.
+- [ ] **Screens + flow:** Splash, first-run consent, Measuring (dual-arc radar dial), No-cellular
+  fallback — all with motion, states, and accessibility.
+- [ ] **Live cellular providers:** swap the simulated sampler for real `NetworkConnection`
+  (download + upload over Cloudflare `__down` / `__up` endpoints, paced for 10–40 MB/min budget).
+- [ ] **Accessibility + UI tests:** Dynamic Type support, VoiceOver announcements, Reduce Motion,
+  XCUITest coverage.
+- [ ] **Icon + App Store readiness:** app icon, Privacy Manifest, submission prep.
+- [x] **Minimum deployment target:** iOS 26 + Swift 6 strict concurrency
 
 ---
 
