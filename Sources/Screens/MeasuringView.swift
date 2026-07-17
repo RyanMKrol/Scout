@@ -21,7 +21,7 @@ struct MeasuringView: View {
 
     private func measuringContent() -> some View {
         VStack(spacing: 0) {
-            statusRow()
+            statusRow(paused: false)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 120)
 
@@ -40,18 +40,6 @@ struct MeasuringView: View {
                 .padding(.bottom, 48)
         }
         .padding(.horizontal, 30)
-    }
-
-    private func statusRow() -> some View {
-        HStack(spacing: 9) {
-            PulsingDot(color: session.quality.color, diameter: 7)
-
-            Text("SWEEPING")
-                .font(.system(size: 14, weight: .semibold))
-                .tracking(2.5)
-                .foregroundStyle(ScoutTheme.white(0.5))
-        }
-        .accessibilityIdentifier("measuring.status")
     }
 
     private func footer() -> some View {
@@ -116,19 +104,112 @@ struct MeasuringView: View {
     }
 
     private func pausedContent() -> some View {
-        VStack(spacing: 24) {
-            Text("PAUSED")
-                .font(.title)
-                .foregroundStyle(ScoutTheme.white(1.0))
-                .accessibilityIdentifier("paused.title")
+        VStack(spacing: 0) {
+            statusRow(paused: true)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, 120)
 
             SweepDialView(mode: .idle)
+                .frame(maxHeight: .infinity, alignment: .center)
 
-            if !consentGiven {
-                Button("Start sweeping", action: onStart)
-                    .accessibilityIdentifier("paused.startButton")
+            pausedFooter()
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 48)
+        }
+        .padding(.horizontal, 30)
+    }
+
+    private func statusRow(paused: Bool = false) -> some View {
+        HStack(spacing: 9) {
+            if paused {
+                Circle()
+                    .fill(ScoutTheme.white(0.28))
+                    .frame(width: 7, height: 7)
+            } else {
+                PulsingDot(color: session.quality.color, diameter: 7)
+            }
+
+            let text = paused ? "PAUSED" : "SWEEPING"
+            Text(text)
+                .font(.system(size: 14, weight: .semibold))
+                .tracking(2.5)
+                .foregroundStyle(paused ? ScoutTheme.white(0.4) : ScoutTheme.white(0.5))
+        }
+        .accessibilityIdentifier(!paused ? "measuring.status" : "paused.status")
+    }
+
+    private func pausedFooter() -> some View {
+        VStack(spacing: 20) {
+            if consentGiven {
+                noCellularFooter()
+            } else {
+                idleFooter()
             }
         }
+    }
+
+    private func noCellularFooter() -> some View {
+        VStack(spacing: 16) {
+            Text("No cellular to measure")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(ScoutTheme.white(0.82))
+                .accessibilityIdentifier("paused.title")
+
+            bodyWithEmphasis(
+                baseText: "Scout measures your cellular speed — download and upload. Turn off Airplane Mode or Wi-Fi to start sweeping.",
+                emphasizedWord: "cellular"
+            )
+            .accessibilityIdentifier("paused.body")
+        }
+    }
+
+    private func idleFooter() -> some View {
+        VStack(spacing: 16) {
+            Text("Sweeping is off")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(ScoutTheme.white(0.82))
+                .accessibilityIdentifier("paused.title")
+
+            Text("Scout only measures cellular data when you choose. Start sweeping to measure this spot.")
+                .font(.system(size: 15))
+                .foregroundStyle(ScoutTheme.white(0.5))
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 280)
+                .accessibilityIdentifier("paused.body")
+
+            Button(action: onStart) {
+                Text("Start sweeping")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(ScoutTheme.onAccent)
+                    .frame(maxWidth: 240)
+                    .frame(height: 50)
+                    .background(ScoutTheme.great)
+                    .cornerRadius(14)
+            }
+            .accessibilityIdentifier("paused.startButton")
+        }
+    }
+
+    private func bodyWithEmphasis(baseText: String, emphasizedWord: String) -> some View {
+        let components = baseText.components(separatedBy: emphasizedWord)
+        var result: Text?
+
+        for (index, component) in components.enumerated() {
+            if index > 0 {
+                result = (result ?? Text(""))
+                    + Text(emphasizedWord)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(ScoutTheme.white(0.7))
+            }
+            result = (result ?? Text(""))
+                + Text(component)
+                .font(.system(size: 15))
+                .foregroundStyle(ScoutTheme.white(0.5))
+        }
+
+        return (result ?? Text(""))
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: 280)
     }
 
     private func qualityLabel(_ quality: SignalQuality) -> String {
