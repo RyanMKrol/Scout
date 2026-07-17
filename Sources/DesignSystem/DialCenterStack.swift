@@ -49,6 +49,7 @@ struct DialCenterStack: View {
             HStack(spacing: 6) {
                 ArrowGlyph(direction: .down)
                     .foregroundStyle(ScoutTheme.white(0.55))
+                    .accessibilityHidden(true)
                 Text("Mbps down")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(ScoutTheme.white(0.55))
@@ -58,6 +59,7 @@ struct DialCenterStack: View {
             HStack(spacing: 4) {
                 ArrowGlyph(direction: .up)
                     .foregroundStyle(ScoutTheme.uploadText)
+                    .accessibilityHidden(true)
 
                 Text(content.upDisplay)
                     .font(.system(size: 19, weight: .semibold, design: .default))

@@ -35,11 +35,27 @@ struct MeasuringView: View {
             )))
             .frame(maxHeight: .infinity, alignment: .center)
 
-            footer()
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, 48)
+            VStack(spacing: 0) {
+                footer()
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, 48)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Current speed")
+            .accessibilityAddTraits(.updatesFrequently)
+            .accessibilityValue(
+                AccessibilitySummary.value(
+                    downloadMbps: session.downloadMbps,
+                    uploadMbps: session.uploadMbps,
+                    generation: session.generation,
+                    quality: session.quality,
+                    downloadBytes: session.sessionDownloadBytes,
+                    uploadBytes: session.sessionUploadBytes
+                )
+            )
         }
         .padding(.horizontal, 30)
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
     }
 
     private func footer() -> some View {
@@ -69,6 +85,7 @@ struct MeasuringView: View {
                 ArrowGlyph(direction: .down)
                     .frame(width: 11, height: 13)
                     .foregroundStyle(ScoutTheme.white(0.72))
+                    .accessibilityHidden(true)
 
                 Text(ScoutMeter.megabytesDisplay(bytes: session.sessionDownloadBytes))
                     .font(.system(size: 14, design: .monospaced))
@@ -84,12 +101,14 @@ struct MeasuringView: View {
                 Text(" · ")
                     .font(.system(size: 14))
                     .foregroundStyle(ScoutTheme.white(0.3))
+                    .accessibilityHidden(true)
             }
 
             HStack(spacing: 6) {
                 ArrowGlyph(direction: .up)
                     .frame(width: 11, height: 13)
                     .foregroundStyle(ScoutTheme.uploadText)
+                    .accessibilityHidden(true)
 
                 Text(ScoutMeter.megabytesDisplay(bytes: session.sessionUploadBytes))
                     .font(.system(size: 14, design: .monospaced))
@@ -112,11 +131,17 @@ struct MeasuringView: View {
             SweepDialView(mode: .idle)
                 .frame(maxHeight: .infinity, alignment: .center)
 
-            pausedFooter()
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, 48)
+            VStack(spacing: 20) {
+                pausedFooter()
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, 48)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Measurement paused")
+            .accessibilityValue(pausedAccessibilityValue())
         }
         .padding(.horizontal, 30)
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
     }
 
     private func statusRow(paused: Bool = false) -> some View {
@@ -125,8 +150,10 @@ struct MeasuringView: View {
                 Circle()
                     .fill(ScoutTheme.white(0.28))
                     .frame(width: 7, height: 7)
+                    .accessibilityHidden(true)
             } else {
                 PulsingDot(color: session.quality.color, diameter: 7)
+                    .accessibilityHidden(true)
             }
 
             let text = paused ? "PAUSED" : "SWEEPING"
@@ -220,6 +247,16 @@ struct MeasuringView: View {
             "Usable"
         case .poor:
             "Poor"
+        }
+    }
+
+    private func pausedAccessibilityValue() -> String {
+        if consentGiven {
+            "No cellular to measure. Scout measures your cellular speed — download and upload. " +
+                "Turn off Airplane Mode or Wi-Fi to start sweeping."
+        } else {
+            "Sweeping is off. Scout only measures cellular data when you choose. " +
+                "Start sweeping to measure this spot."
         }
     }
 }

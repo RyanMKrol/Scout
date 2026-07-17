@@ -13,6 +13,7 @@ struct ConsentView: View {
                 ScrollView {
                     VStack(spacing: 32) {
                         RadarMarkView(style: .consent)
+                            .accessibilityHidden(true)
 
                         VStack(spacing: 16) {
                             Text("Scout uses cellular data to measure")
@@ -80,6 +81,7 @@ struct ConsentView: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 48)
             }
+            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         }
     }
 

@@ -33,11 +33,13 @@ struct SweepDialView: View {
                 rotating: true
             )
             .frame(width: dialDiameter - 30, height: dialDiameter - 30)
+            .accessibilityHidden(true)
 
             // Download track (264 pt diameter, 7 pt stroke, white 0.07)
             Circle()
                 .stroke(ScoutTheme.white(0.07), lineWidth: 7)
                 .frame(width: dialDiameter - 24, height: dialDiameter - 24)
+                .accessibilityHidden(true)
 
             // Download arc (264 pt diameter, 7 pt stroke, quality color)
             Circle()
@@ -47,11 +49,13 @@ struct SweepDialView: View {
                 .frame(width: dialDiameter - 24, height: dialDiameter - 24)
                 .animation(.linear(duration: ScoutMotion.arcDuration), value: content.downFraction)
                 .animation(.easeInOut(duration: ScoutMotion.colorDuration), value: content.qualityColor)
+                .accessibilityHidden(true)
 
             // Upload track (200 pt diameter, 6 pt stroke, white 0.06)
             Circle()
                 .stroke(ScoutTheme.white(0.06), lineWidth: 6)
                 .frame(width: 200, height: 200)
+                .accessibilityHidden(true)
 
             // Upload arc (200 pt diameter, 6 pt stroke, uploadArc)
             Circle()
@@ -60,9 +64,11 @@ struct SweepDialView: View {
                 .rotationEffect(.degrees(-90))
                 .frame(width: 200, height: 200)
                 .animation(.linear(duration: ScoutMotion.arcDuration), value: content.upFraction)
+                .accessibilityHidden(true)
 
             // Center stack
             DialCenterStack(mode: .live(content))
+                .accessibilityHidden(true)
         }
         .frame(width: dialDiameter, height: dialDiameter)
     }
@@ -75,9 +81,11 @@ struct SweepDialView: View {
             Circle()
                 .stroke(ScoutTheme.white(0.06), lineWidth: 7)
                 .frame(width: dialDiameter - 24, height: dialDiameter - 24)
+                .accessibilityHidden(true)
 
             // Center stack
             DialCenterStack(mode: .idle)
+                .accessibilityHidden(true)
         }
         .frame(width: dialDiameter, height: dialDiameter)
     }

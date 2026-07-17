@@ -54,6 +54,7 @@ struct SplashView: View {
                 .padding(.bottom, 64)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         }
     }
 }

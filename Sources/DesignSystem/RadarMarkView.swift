@@ -25,12 +25,15 @@ struct RadarMarkView: View {
                 period: ScoutMotion.splashSweepPeriod,
                 rotating: true
             )
+            .accessibilityHidden(true)
 
             rings(radii: [92, 62, 32], opacities: [0.09, 0.11, 0.13])
+                .accessibilityHidden(true)
 
             Circle()
                 .fill(ScoutTheme.great)
                 .frame(width: 12, height: 12)
+                .accessibilityHidden(true)
         }
     }
 
@@ -43,12 +46,15 @@ struct RadarMarkView: View {
                 period: ScoutMotion.splashSweepPeriod,
                 rotating: false
             )
+            .accessibilityHidden(true)
 
             rings(radii: [35, 22], opacities: [0.10, 0.12])
+                .accessibilityHidden(true)
 
             Circle()
                 .fill(ScoutTheme.great)
                 .frame(width: 9, height: 9)
+                .accessibilityHidden(true)
         }
     }
 
