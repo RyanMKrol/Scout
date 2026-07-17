@@ -82,7 +82,8 @@
         "risk": []
       },
       "scope": [
-        "Sources/Domain/**"
+        "Sources/Domain/**",
+        "Tests/DomainTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -106,7 +107,8 @@
         "risk": []
       },
       "scope": [
-        "Sources/Domain/**"
+        "Sources/Domain/**",
+        "Tests/ThroughputWindowTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -133,7 +135,8 @@
         ]
       },
       "scope": [
-        "Sources/Domain/**"
+        "Sources/Domain/**",
+        "Tests/ScenarioWalkTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -161,7 +164,8 @@
         ]
       },
       "scope": [
-        "Sources/Domain/**"
+        "Sources/Domain/**",
+        "Tests/SweepSessionTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -185,7 +189,8 @@
         "risk": []
       },
       "scope": [
-        "Sources/App/**"
+        "Sources/App/**",
+        "Tests/AppRouterTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -212,7 +217,8 @@
         ]
       },
       "scope": [
-        "Sources/App/**"
+        "Sources/App/**",
+        "Tests/AppEnvironmentTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -396,7 +402,8 @@
       },
       "scope": [
         "Sources/Live/**",
-        "Sources/App/**"
+        "Sources/App/**",
+        "Tests/RadioTechnologyMappingTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -447,7 +454,8 @@
         "risk": []
       },
       "scope": [
-        "Sources/Live/**"
+        "Sources/Live/**",
+        "Tests/HTTPResponseParserTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -671,7 +679,8 @@
         "risk": []
       },
       "scope": [
-        "Sources/Domain/**"
+        "Sources/Domain/**",
+        "Tests/SimulatedProvidersTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -808,7 +817,8 @@
         "risk": []
       },
       "scope": [
-        "Sources/Live/**"
+        "Sources/Live/**",
+        "Tests/HTTPProbeRequestTests.swift"
       ],
       "design": null,
       "verify": [],
@@ -832,7 +842,8 @@
         "risk": []
       },
       "scope": [
-        "Sources/Domain/**"
+        "Sources/Domain/**",
+        "Tests/AccessibilitySummaryTests.swift"
       ],
       "design": null,
       "verify": [],
