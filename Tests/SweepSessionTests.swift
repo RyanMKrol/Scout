@@ -49,6 +49,27 @@ private final class FakeCellularPathMonitor: CellularPathMonitoring, @unchecked 
     }
 }
 
+private final class ManualClock: @unchecked Sendable {
+    private let lock = NSLock()
+    private var instant: ContinuousClock.Instant
+
+    init(start: ContinuousClock.Instant = ContinuousClock().now) {
+        instant = start
+    }
+
+    func now() -> ContinuousClock.Instant {
+        lock.lock()
+        defer { lock.unlock() }
+        return instant
+    }
+
+    func advance(by duration: Duration) {
+        lock.lock()
+        instant = instant.advanced(by: duration)
+        lock.unlock()
+    }
+}
+
 @MainActor
 final class SweepSessionTests: XCTestCase {
     private func waitUntil(
@@ -195,6 +216,49 @@ final class SweepSessionTests: XCTestCase {
 
         await waitUntil { sampler.terminatedCount == 1 }
         XCTAssertEqual(sampler.terminatedCount, 1)
+
+        session.stop()
+    }
+
+    func testStalledSampleDecaysReadingAndClearsOnFreshSample() async {
+        let sampler = FakeThroughputSampler()
+        let radio = FakeRadioInfoProvider()
+        let path = FakeCellularPathMonitor()
+        let clock = ManualClock()
+        let session = SweepSession(sampler: sampler, radio: radio, path: path, now: clock.now)
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 250_000, transferDuration: .milliseconds(200),
+                endedAt: ContinuousClock().now
+            )
+        )
+        await waitUntil { session.downloadMbps > 0 }
+        XCTAssertEqual(session.downloadMbps, 10.0, accuracy: 0.001)
+        XCTAssertFalse(session.isStalled)
+
+        // No fresh sample arrives: advance the injected clock well past the staleness
+        // threshold + decay window so the reading must fall fully to zero.
+        clock.advance(by: SweepSession.stalenessThreshold + SweepSession.stalenessDecayDuration)
+        await waitUntil { session.isStalled }
+
+        XCTAssertTrue(session.isStalled)
+        await waitUntil { session.downloadMbps == 0 }
+        XCTAssertEqual(session.downloadMbps, 0)
+
+        // A fresh sample immediately clears the stalled state.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 250_000, transferDuration: .milliseconds(200),
+                endedAt: ContinuousClock().now
+            )
+        )
+        await waitUntil { !session.isStalled }
+        XCTAssertFalse(session.isStalled)
+        XCTAssertEqual(session.downloadMbps, 10.0, accuracy: 0.001)
 
         session.stop()
     }

@@ -71,10 +71,11 @@ struct MeasuringView: View {
     }
 
     private func qualityWord() -> some View {
-        let qualityText = qualityLabel(session.quality)
+        let qualityText = session.isStalled ? "Measuring…" : qualityLabel(session.quality)
+        let qualityColor = session.isStalled ? ScoutTheme.white(0.5) : session.quality.color
         return Text(qualityText)
             .font(.system(size: 20, weight: .semibold))
-            .foregroundStyle(session.quality.color)
+            .foregroundStyle(qualityColor)
             .animation(.easeInOut(duration: ScoutMotion.colorDuration), value: session.quality)
             .accessibilityIdentifier("measuring.quality")
     }
@@ -152,8 +153,11 @@ struct MeasuringView: View {
                     .frame(width: 7, height: 7)
                     .accessibilityHidden(true)
             } else {
-                PulsingDot(color: session.quality.color, diameter: 7)
-                    .accessibilityHidden(true)
+                PulsingDot(
+                    color: session.isStalled ? ScoutTheme.white(0.4) : session.quality.color,
+                    diameter: 7
+                )
+                .accessibilityHidden(true)
             }
 
             let text = paused ? "PAUSED" : "SWEEPING"
