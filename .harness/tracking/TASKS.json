@@ -828,7 +828,7 @@
     {
       "id": "T033",
       "title": "AccessibilitySummary: the spoken-value builder (pure)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T004"
       ],
