@@ -32,7 +32,9 @@ targets:
         # dict is the documented minimum to opt into full-screen native rendering. (Learned
         # from a sibling harness project that shipped every screen letterboxed until it added
         # this — see .harness/custom/visual-verify-build.md's letterbox guard.)
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIUserInterfaceStyle: Dark
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.scout

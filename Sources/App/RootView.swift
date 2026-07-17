@@ -83,5 +83,6 @@ struct RootView: View {
             }
         }
         .environment(session)
+        .preferredColorScheme(.dark)
     }
 }
