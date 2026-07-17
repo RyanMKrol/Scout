@@ -306,7 +306,7 @@
     {
       "id": "T013",
       "title": "SweepDial: dual-arc radar dial assembly",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T004",
         "T010",
