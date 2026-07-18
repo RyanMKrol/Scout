@@ -1120,6 +1120,193 @@
         "workType": "feature",
         "risk": []
       }
+    },
+    {
+      "id": "T045",
+      "title": "Continuous streaming download sampler (replace discrete paced probes)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "live-hunter"
+      ],
+      "facets": {
+        "layer": "networking",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Live/**",
+        "Sources/Domain/**",
+        "Tests/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T045.md"
+    },
+    {
+      "id": "T046",
+      "title": "Wall-clock throughput window (bytes-in-last-0.5s over 0.5s)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "live-hunter"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Domain/**",
+        "Tests/ThroughputWindowTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T046.md"
+    },
+    {
+      "id": "T047",
+      "title": "Wire continuous samples through SweepSession (live wall-clock reading)",
+      "status": "pending",
+      "dependsOn": [
+        "T045",
+        "T046"
+      ],
+      "gate": null,
+      "tags": [
+        "live-hunter"
+      ],
+      "facets": {
+        "layer": "measurement",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Domain/**",
+        "Tests/SweepSessionTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T047.md"
+    },
+    {
+      "id": "T048",
+      "title": "Periodic upload bursts alongside the continuous download",
+      "status": "pending",
+      "dependsOn": [
+        "T045"
+      ],
+      "gate": null,
+      "tags": [
+        "live-hunter"
+      ],
+      "facets": {
+        "layer": "networking",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Live/**",
+        "Sources/Domain/**",
+        "Tests/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T048.md"
+    },
+    {
+      "id": "T049",
+      "title": "Uncap the readout and retune the dial scale to real speeds",
+      "status": "pending",
+      "dependsOn": [
+        "T047"
+      ],
+      "gate": null,
+      "tags": [
+        "live-hunter"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Domain/**",
+        "Sources/DesignSystem/**",
+        "Sources/Screens/**",
+        "Tests/DomainTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T049.md"
+    },
+    {
+      "id": "T050",
+      "title": "Session data/time auto-stop backstop",
+      "status": "pending",
+      "dependsOn": [
+        "T045"
+      ],
+      "gate": null,
+      "tags": [
+        "live-hunter"
+      ],
+      "facets": {
+        "layer": "app",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Domain/**",
+        "Sources/Screens/**",
+        "Sources/App/**",
+        "Tests/SweepSessionTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "visualVerify": true,
+      "spec": ".harness/tasks/T050.md"
+    },
+    {
+      "id": "T051",
+      "title": "Honest data-use copy for the continuous-download model",
+      "status": "pending",
+      "dependsOn": [
+        "T050"
+      ],
+      "gate": null,
+      "tags": [
+        "live-hunter",
+        "docs"
+      ],
+      "facets": {
+        "layer": "ui",
+        "workType": "docs",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Screens/ConsentView.swift",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "visualVerify": true,
+      "spec": ".harness/tasks/T051.md"
     }
   ]
 }
