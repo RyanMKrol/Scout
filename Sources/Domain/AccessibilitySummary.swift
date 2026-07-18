@@ -7,6 +7,7 @@ struct AccessibilitySummaryInput {
     let quality: SignalQuality
     let downloadBytes: Int64
     let uploadBytes: Int64
+    let isPaused: Bool
 }
 
 enum AccessibilitySummary {
@@ -17,7 +18,8 @@ enum AccessibilitySummary {
         generation: RadioGeneration,
         quality: SignalQuality,
         downloadBytes: Int64,
-        uploadBytes: Int64
+        uploadBytes: Int64,
+        isPaused: Bool = false
     ) -> String {
         let input = AccessibilitySummaryInput(
             downloadMbps: downloadMbps,
@@ -25,7 +27,8 @@ enum AccessibilitySummary {
             generation: generation,
             quality: quality,
             downloadBytes: downloadBytes,
-            uploadBytes: uploadBytes
+            uploadBytes: uploadBytes,
+            isPaused: isPaused
         )
         return buildValue(input)
     }
@@ -44,7 +47,8 @@ enum AccessibilitySummary {
         components.append(qualityPart)
         components.append(dataPart)
 
-        return components.joined(separator: ", ")
+        let summary = components.joined(separator: ", ")
+        return input.isPaused ? "Paused, reading frozen. \(summary)" : summary
     }
 
     private nonisolated static func formatDownload(_ mbps: Double) -> String {

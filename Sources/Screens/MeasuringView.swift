@@ -21,19 +21,12 @@ struct MeasuringView: View {
 
     private func measuringContent() -> some View {
         VStack(spacing: 0) {
-            statusRow(paused: false)
+            statusRow(session.isPaused ? .livePaused : .sweeping)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 120)
 
-            SweepDialView(mode: .live(DialContent(
-                downDisplay: ScoutMeter.downloadDisplay(session.downloadMbps),
-                upDisplay: ScoutMeter.uploadDisplay(session.uploadMbps),
-                downFraction: ScoutMeter.downloadArcFraction(session.downloadMbps),
-                upFraction: ScoutMeter.uploadArcFraction(session.uploadMbps),
-                qualityColor: session.quality.color,
-                generationText: session.generation.rawValue
-            )))
-            .frame(maxHeight: .infinity, alignment: .center)
+            liveDial()
+                .frame(maxHeight: .infinity, alignment: .center)
 
             VStack(spacing: 0) {
                 footer()
@@ -50,12 +43,55 @@ struct MeasuringView: View {
                     generation: session.generation,
                     quality: session.quality,
                     downloadBytes: session.sessionDownloadBytes,
-                    uploadBytes: session.sessionUploadBytes
+                    uploadBytes: session.sessionUploadBytes,
+                    isPaused: session.isPaused
                 )
             )
         }
         .padding(.horizontal, 30)
         .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+    }
+
+    private func liveDial() -> some View {
+        SweepDialView(mode: .live(DialContent(
+            downDisplay: ScoutMeter.downloadDisplay(session.downloadMbps),
+            upDisplay: ScoutMeter.uploadDisplay(session.uploadMbps),
+            downFraction: ScoutMeter.downloadArcFraction(session.downloadMbps),
+            upFraction: ScoutMeter.uploadArcFraction(session.uploadMbps),
+            qualityColor: session.quality.color,
+            generationText: session.generation.rawValue
+        )))
+        .contentShape(Circle())
+        .onTapGesture {
+            session.togglePause()
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier("dial.pauseToggle")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(session.isPaused ? "Sweep paused" : "Live sweep")
+        .accessibilityAction(named: Text(session.isPaused ? "Resume sweeping" : "Pause sweeping")) {
+            session.togglePause()
+        }
+        .overlay {
+            if session.isPaused {
+                pausedDialIndicator()
+            }
+        }
+    }
+
+    private func pausedDialIndicator() -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: "pause.fill")
+                .font(.system(size: 32, weight: .semibold))
+                .foregroundStyle(ScoutTheme.white(0.7))
+
+            Text("PAUSED")
+                .font(.system(size: 14, weight: .semibold))
+                .tracking(2)
+                .foregroundStyle(ScoutTheme.white(0.6))
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("dial.paused")
     }
 
     private func footer() -> some View {
@@ -125,7 +161,7 @@ struct MeasuringView: View {
 
     private func pausedContent() -> some View {
         VStack(spacing: 0) {
-            statusRow(paused: true)
+            statusRow(.emptyPaused)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 120)
 
@@ -145,28 +181,34 @@ struct MeasuringView: View {
         .dynamicTypeSize(...DynamicTypeSize.accessibility2)
     }
 
-    private func statusRow(paused: Bool = false) -> some View {
+    private enum StatusRowState {
+        case sweeping
+        case livePaused
+        case emptyPaused
+    }
+
+    private func statusRow(_ state: StatusRowState) -> some View {
         HStack(spacing: 9) {
-            if paused {
-                Circle()
-                    .fill(ScoutTheme.white(0.28))
-                    .frame(width: 7, height: 7)
-                    .accessibilityHidden(true)
-            } else {
+            if state == .sweeping {
                 PulsingDot(
                     color: session.isStalled ? ScoutTheme.white(0.4) : session.quality.color,
                     diameter: 7
                 )
                 .accessibilityHidden(true)
+            } else {
+                Circle()
+                    .fill(ScoutTheme.white(0.28))
+                    .frame(width: 7, height: 7)
+                    .accessibilityHidden(true)
             }
 
-            let text = paused ? "PAUSED" : "SWEEPING"
+            let text = state == .sweeping ? "SWEEPING" : "PAUSED"
             Text(text)
                 .font(.system(size: 14, weight: .semibold))
                 .tracking(2.5)
-                .foregroundStyle(paused ? ScoutTheme.white(0.4) : ScoutTheme.white(0.5))
+                .foregroundStyle(state == .sweeping ? ScoutTheme.white(0.5) : ScoutTheme.white(0.4))
         }
-        .accessibilityIdentifier(!paused ? "measuring.status" : "paused.status")
+        .accessibilityIdentifier(state == .emptyPaused ? "paused.status" : "measuring.status")
     }
 
     private func pausedFooter() -> some View {
