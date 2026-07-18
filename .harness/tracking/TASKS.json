@@ -1071,6 +1071,55 @@
         "workType": "feature",
         "risk": []
       }
+    },
+    {
+      "id": "T043",
+      "title": "Launch-arg seam to start the app in the LIVE measuring state (for UI tests)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "app"
+      ],
+      "scope": [
+        "Sources/App/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T043.md",
+      "facets": {
+        "layer": "app",
+        "workType": "config",
+        "risk": []
+      }
+    },
+    {
+      "id": "T044",
+      "title": "Tap the dial center to pause/resume the live sweep (gesture + paused visual + UI test)",
+      "status": "pending",
+      "dependsOn": [
+        "T043"
+      ],
+      "gate": null,
+      "tags": [
+        "ui"
+      ],
+      "scope": [
+        "Sources/Screens/**",
+        "Sources/DesignSystem/**",
+        "Sources/Domain/**",
+        "Tests/**"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T044.md",
+      "facets": {
+        "layer": "ui",
+        "workType": "feature",
+        "risk": []
+      }
     }
   ]
 }
