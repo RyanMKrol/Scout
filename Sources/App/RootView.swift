@@ -6,21 +6,25 @@ struct RootView: View {
     @State private var router: AppRouter
     @State private var session: SweepSession
     @State private var forceIdle: Bool
+    @State private var forceMeasuring: Bool
 
     init() {
         let initialConsent = UserDefaults.standard.bool(forKey: "firstRunConsentGiven")
         let forceIdle = UserDefaults.standard.bool(forKey: "ScoutForceIdle")
+        let forceMeasuring = UserDefaults.standard.bool(forKey: "ScoutForceMeasuring")
         let holdSplash = UserDefaults.standard.bool(forKey: "ScoutHoldSplash")
 
         // When forceIdle is set, pretend consent is given so splashFinished() lands on measuring
+        // When forceMeasuring is set, consent is true and we start the session live
         let router = AppRouter(
-            consentGiven: initialConsent || forceIdle,
+            consentGiven: initialConsent || forceIdle || forceMeasuring,
             holdSplash: holdSplash
         )
 
         _router = State(wrappedValue: router)
         _session = State(wrappedValue: AppEnvironment.makeSession())
         _forceIdle = State(wrappedValue: forceIdle)
+        _forceMeasuring = State(wrappedValue: forceMeasuring)
     }
 
     var body: some View {
@@ -41,7 +45,7 @@ struct RootView: View {
             case .measuring:
                 MeasuringView(
                     session: session,
-                    consentGiven: router.consentGiven && !forceIdle,
+                    consentGiven: forceMeasuring || (router.consentGiven && !forceIdle),
                     onStart: {
                         router.startSweeping()
                         session.start()
@@ -77,6 +81,8 @@ struct RootView: View {
                 router.splashFinished()
                 if forceIdle {
                     consentGiven = false
+                } else if forceMeasuring {
+                    session.start()
                 } else if router.phase == .measuring, router.consentGiven {
                     session.start()
                 }
