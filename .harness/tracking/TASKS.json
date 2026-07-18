@@ -1097,7 +1097,7 @@
     {
       "id": "T044",
       "title": "Tap the dial center to pause/resume the live sweep (gesture + paused visual + UI test)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T043"
       ],
