@@ -1,1 +1,7 @@
-{}
+{
+  "T042": {
+    "failed": true,
+    "reason": "review-failed: superseded by T043+T044 — original blocked on scope-creep (needed Sources/Domain/AccessibilitySummary.swift out of scope); re-scoped to include Sources/Domain/** + Tests/**, plus a -ScoutForceMeasuring launch seam so the UI test is drivable",
+    "at": "2026-07-18T09:05:11Z"
+  }
+}
