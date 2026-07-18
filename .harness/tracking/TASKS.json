@@ -1075,7 +1075,7 @@
     {
       "id": "T043",
       "title": "Launch-arg seam to start the app in the LIVE measuring state (for UI tests)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
