@@ -151,39 +151,13 @@ the rotating sweep, `Circle().trim()` for the arc).
 
 ---
 
-## Status
-
-The app is in active development per the backlog below.
-
-### Roadmap (phases)
-
-- [ ] **Foundation:** cellular-bound dual-direction (download + upload) throughput sampler with
-  rolling-window Mbps calculation, ~4×/sec UI updates, radio-generation label via CoreTelephony.
-- [ ] **Simulated measurement engine:** a scripted fake for unit testing the windowing math and
-  quality-band logic without touching the live radio.
-- [ ] **Screens + flow:** Splash, first-run consent, Measuring (dual-arc radar dial), No-cellular
-  fallback — all with motion, states, and accessibility.
-- [ ] **Live cellular providers:** swap the simulated sampler for real `NetworkConnection`
-  (download + upload over Cloudflare `__down` / `__up` endpoints, paced for 30–60 MB/min budget).
-- [ ] **Accessibility + UI tests:** Dynamic Type support, VoiceOver announcements, Reduce Motion,
-  XCUITest coverage.
-- [ ] **Icon + App Store readiness:** app icon, Privacy Manifest, submission prep.
-- [x] **Minimum deployment target:** iOS 26 + Swift 6 strict concurrency
-
----
-
-## Build status
+## Building this project
 
 This repo is built by the autonomous implementation harness (`.harness/`) — one fully-verified task at a
-time, gated on green CI. The table reflects the current backlog in
-[`.harness/tracking/TASKS.json`](./.harness/tracking/TASKS.json); the loop keeps task status in lockstep as
-work lands. See [`.harness/docs/HARNESS.md`](./.harness/docs/HARNESS.md) for how it works.
-
-| Task | Description | Status |
-|------|-------------|--------|
-| T001 | XcodeGen project scaffold + SwiftFormat/SwiftLint + CI green on an empty build | 🔒 needs-human — pending |
-
-_Grow the backlog with `/implementation-harness-add-to-backlog`._
+time, gated on green CI. The live backlog and per-task status live in
+[`.harness/tracking/TASKS.json`](./.harness/tracking/TASKS.json) and the harness dashboard (always current);
+see [`.harness/docs/HARNESS.md`](./.harness/docs/HARNESS.md) for how the loop works and
+[`.harness/README.md`](./.harness/README.md) to get started.
 
 ---
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# harness-loop-variant: worktree   # read by implementation-harness-upgrade to pick the right reference — do not remove
+# harness-loop-variant: worktree   # read by implementation-harness:upgrade to pick the right reference — do not remove
 #
 # loop.sh — the single SEQUENTIAL "Ralph loop" that builds a TASKS.json backlog.
 #
@@ -14,11 +14,12 @@
 #     • does every task's build in its OWN dedicated sibling worktree (../<repo>-loop),
 #     • integrates by fast-forwarding `main` via push — WHILE BUILDING it never checks `main` out anywhere.
 #   The only shared state it writes is the git ref db (fetch/worktree/branch) and its lock.
-#   ONCE THE BACKLOG IS DRAINED and the loop exits cleanly, it optionally leaves your PRIMARY checkout on
-#   the latest `main` — a convenience so your local copy reflects everything that just landed. This is the
-#   one time it touches the primary checkout, and it's SAFE + best-effort: it skips a dirty tree (never
-#   clobbers uncommitted work), fast-forwards only, and is non-fatal. See sync_primary_checkout(); disable
-#   with SYNC_PRIMARY_ON_DONE=0.
+#   AFTER EVERY ITERATION (and on the drain / MAX_ITERS exits) it optionally fast-forwards your PRIMARY
+#   checkout onto the latest `main`, so your local copy — and the dashboard, which reads the primary
+#   checkout's files — reflects each task as it lands, not only once the backlog drains. This is the only
+#   thing that touches the primary checkout, and it's SAFE + best-effort: it skips a dirty tree (never
+#   clobbers uncommitted work) and a non-main HEAD, fast-forwards only, and is non-fatal. See
+#   sync_primary_checkout(); disable with SYNC_PRIMARY_ON_DONE=0.
 #
 # CONCURRENCY GUARD:
 #   A lock in the shared .git ensures two `loop.sh` instances can't run at once (the
@@ -90,7 +91,7 @@ EFFORT="${EFFORT:-}"                              # low|medium|high|xhigh|max, o
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-2}"                 # soft failures per rung before escalating (2: the global ladder is fine-grained, so fewer tries per rung bounds the total attempt budget)
 MAX_ITERS="${MAX_ITERS:-100}"                     # global iteration cap (backstop)
 WAIT_SECONDS="${WAIT_SECONDS:-30}"               # backoff between retries / CI polls
-CI_TIMEOUT="${CI_TIMEOUT:-1200}"                 # max seconds to wait for a CI run to finish
+CI_TIMEOUT="${CI_TIMEOUT:-3600}"                 # max seconds to wait for a CI run to finish (default 1h)
 CI_WORKFLOW="${CI_WORKFLOW:-CI}"                 # MUST match `name:` in your CI workflow yaml
 REQUIRE_CI="${REQUIRE_CI:-1}"                     # 1 = never merge without green CI
 INTEGRATE_HOOK="${INTEGRATE_HOOK:-}"             # optional cmd run after each task integrates (deploy/restart)
@@ -112,7 +113,7 @@ LOOP_WT="${LOOP_WT:-$(dirname "$ROOT")/${NAME}-loop}"   # the loop's own isolati
 WORK_DIR="$LOOP_WT"
 PROMPT_DIR="$LOOP_WT/.harness/worklog"
 MAIN_BRANCH="main"
-SYNC_PRIMARY_ON_DONE="${SYNC_PRIMARY_ON_DONE:-1}"   # when the loop finishes (backlog drained), leave the PRIMARY checkout on the latest main (safe/ff-only, skips a dirty tree); 0=never touch the primary checkout
+SYNC_PRIMARY_ON_DONE="${SYNC_PRIMARY_ON_DONE:-1}"   # ff the PRIMARY checkout onto the latest main after every iteration (and on exit) so it (and the dashboard, which reads its files) reflects each task as it lands (safe/ff-only, skips a dirty tree); 0=never touch the primary checkout
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 CLAUDE_FLAGS="${CLAUDE_FLAGS:---dangerously-skip-permissions}"
 PRINT_PROMPT="${PRINT_PROMPT:-1}"                # 1 = echo each prompt (the running phase only: build OR audit) to the console before invoking Claude; 0 = silence
@@ -348,16 +349,17 @@ reconcile_overlays() {
   log "reconcile: applied owner overlays to TASKS.json"
 }
 
-# sync_primary_checkout — leave the owner's PRIMARY checkout ($ROOT) on the latest main once the loop
-# has finished. The loop builds in an isolated worktree and integrates by pushing to origin/main, so the
-# primary checkout stays on whatever it was — stale relative to the work that just landed. Called ONLY at
-# the clean "backlog drained / idle" exits (never mid-run, never on a rate-limit pause), this fetches and
-# fast-forwards the primary checkout onto main. SAFE + best-effort by design: it refuses on a dirty tree
-# (never stashes or clobbers uncommitted work), fast-forwards only (never rewrites local commits), and is
-# fully non-fatal (every failure just logs and returns). It only ever fast-forwards a checkout that is
-# ALREADY on main — a checkout deliberately left on another branch (or detached) is never switched.
-# Set SYNC_PRIMARY_ON_DONE=0 to keep the worktree variant's strict "never touch the primary checkout"
-# behavior.
+# sync_primary_checkout — keep the owner's PRIMARY checkout ($ROOT) on the latest main. The loop builds
+# in an isolated worktree and integrates by pushing to origin/main, so the primary checkout would
+# otherwise stay stale relative to the work that just landed — and the dashboard reads the primary
+# checkout's files directly, so it would lag too. Called at the END of EVERY ITERATION and on the
+# drain / MAX_ITERS exits (never mid-attempt, never on a rate-limit pause), this fetches and
+# fast-forwards the primary checkout onto main so each completed task is reflected promptly. SAFE +
+# best-effort by design: it refuses on a dirty tree (never stashes or clobbers uncommitted work),
+# fast-forwards only (never rewrites local commits), and is fully non-fatal (every failure just logs and
+# returns). It only ever fast-forwards a checkout that is ALREADY on main — a checkout deliberately left
+# on another branch (or detached) is never switched. A no-op when nothing changed. Set
+# SYNC_PRIMARY_ON_DONE=0 to keep the worktree variant's strict "never touch the primary checkout" behavior.
 sync_primary_checkout() {
   [ "${SYNC_PRIMARY_ON_DONE:-1}" = 1 ] || return 0
   git -C "$ROOT" fetch origin --quiet 2>/dev/null || { log "sync: couldn't fetch origin — leaving primary checkout as-is"; return 0; }
@@ -556,7 +558,7 @@ prompt() {
   cat <<'EOF'
 
 Obey CLAUDE.md, .harness/tracking/TASKS.json, and .harness/docs/HARNESS.md exactly. You run
-head-less and unattended. First read CLAUDE.md (conventions) and README.md (the current implemented state).
+head-less and unattended. First read CLAUDE.md (conventions) and README.md (for product context).
 
 1. BUILD COLD. You are starting FRESH on a clean branch off origin/main — do NOT look for or rely on
    any prior-attempt state (worklog, partial commits); build this task from the spec alone. Read this
@@ -568,12 +570,16 @@ head-less and unattended. First read CLAUDE.md (conventions) and README.md (the 
    HARD-GATE rule are shown under "SCOPE" at the end of this prompt.
 2. DEFINITION OF DONE (.harness/docs/HARNESS.md §5 — all must hold before you report `done`):
    a. Run the project's full verification suite exactly as defined in CLAUDE.md /
-      .harness/docs/HARNESS.md §5 (format, lint, tests, build). These MIRROR CI — if CI runs it,
-      run it locally first. Every check must pass. Run every check to COMPLETION and read its real
-      exit status: for a SLOW check (a multi-minute build/test), request an extended tool timeout or
-      run it in the background and POLL to completion — never fire it under a default-timeout blocking
-      call and assume it passed. A check that times out, is still running, or whose result you did not
-      OBSERVE is NOT a pass — that is `failed:soft` (retryable), never `done`.
+      .harness/docs/HARNESS.md §5 (format, lint, tests, build). These MIRROR CI — run them locally
+      first; every check must pass. Run every check to COMPLETION and read its real exit status: for a
+      SLOW check (a multi-minute build/test), request an extended tool timeout or run it in the
+      background and POLL to completion — never fire it under a default-timeout blocking call and assume
+      it passed. A check that times out, is still running, or whose result you did not
+      OBSERVE is NOT a pass — that is `failed:soft` (retryable), never `done`. If ANY check comes back
+      RED, FIX IT and RE-RUN — re-run the suite as many times as you need; there is NO limit on how
+      often you run it in one attempt. Report `done` ONLY after you have SEEN every check pass. Report
+      `failed:soft` only when you genuinely cannot get it green this attempt (the fix is outside your
+      `scope`, or needs a human or a resource you don't have) — not the moment a check first goes red.
    b. Run the task's relevant integration / end-to-end tests when their preconditions are
       met. Tests that need credentials, funds, or external resources you don't have: leave
       them as they are and record `failed:blocked` if the task's core needs them — never
@@ -583,12 +589,15 @@ head-less and unattended. First read CLAUDE.md (conventions) and README.md (the 
       you OBSERVED in the worklog. The bar is the behaviour the task specifies.
 3. DO NOT edit .harness/tracking/TASKS.json — the loop, not the builder, sets `"status"` to `"done"`
    itself once your build clears the structural checks + audit gate below, in a follow-up commit
-   the loop makes on its own. If a doc (README.md, .harness/docs/LIMITATIONS.md, …) genuinely needs
-   updating for THIS task, update it only if it's listed in your `scope` below — otherwise leave it.
+   the loop makes on its own. NEVER edit the repo-root README.md — it is maintainer-owned product
+   documentation, NOT a status log, and touching it AUTO-FAILS this task (the loop never updates it).
+   Keeping project documentation current is the maintainers' job, not yours: build only what the spec
+   asks, and if the spec itself names a doc file to change AND that file is inside your `scope`, change
+   that file — otherwise touch no docs.
 4. COMMIT — produce EXACTLY ONE commit for the whole task, `<TASK>: <summary>` (INCLUDING
-   `.harness/worklog/<TASK>.md` with a dated entry: what you did, checks run, what remains). If you iterate,
-   fold changes into that SAME commit with `git commit --amend` — do NOT stack multiple commits (the loop
-   integrates a task as one commit). Do NOT push and do NOT merge — **NEVER `git push`**, not ever, even if
+   `.harness/worklog/<TASK>.md` with a dated entry: what you did, checks run, what remains). If you iterate
+   — fix a failing check, add a test, refine — fold the changes into that SAME commit with
+   `git commit --amend`; do NOT stack multiple commits (the loop integrates a task as one commit). Do NOT push and do NOT merge — **NEVER `git push`**, not ever, even if
    your global git guidance says to always push after committing (that rule does NOT apply here). The loop is
    the SOLE pusher: after you finish it runs your checks (structural + LOCAL_DOD), pushes your `<branch>`,
    watches GitHub CI, and fast-forwards `main` on green — a push from you is BLOCKED by a git hook and
@@ -1084,6 +1093,11 @@ for ((i = 1; i <= MAX_ITERS; i++)); do
         else
           log "agent reports idle on $task — Done-when already met on main ($([ "$idle_ci" = 0 ] && echo 'CI green' || echo 'CI status unconfirmed — proceeding as before')); reconciling status=done and continuing."
           record_outcome "$task" false
+          # B11: tear the scratch branch/worktree down like every other terminal path (the block
+          # sub-paths above get this via block_task→cleanup_task). record_outcome removes the worktree
+          # but not the tNNN branch ref, so without this the local branch lingers and postflight's
+          # inprogress() reports it "in flight" forever. AFTER the ledger write, mirroring the done path.
+          cleanup_task "$branch"
           heartbeat_clear; cur_task=""; cur_attempts=0; cur_rung=0; cur_base=0; cur_explored=0
         fi
       fi
@@ -1091,6 +1105,14 @@ for ((i = 1; i <= MAX_ITERS; i++)); do
     *)              log "unrecognized result '$status' — backing off"; sleep "$WAIT_SECONDS" ;;
   esac
   board
+  # Keep the PRIMARY checkout current EVERY iteration, not just on the drain exit below. The loop
+  # commits status/ledger changes to origin/main through a detached worktree, so $ROOT's working tree
+  # (which the dashboard reads directly, and a human `git status`es) would otherwise lag behind until
+  # the backlog drained. Same ff-only / clean-tree / on-main guards as the drain-time call (a no-op
+  # when nothing changed, and it never disturbs a dirty or deliberately-checked-out primary tree).
+  sync_primary_checkout
 done
 
-log "reached MAX_ITERS=$MAX_ITERS — stopping"; run_hook exhausted max-iters; board; exit 4
+# MAX_ITERS backstop: sync the primary checkout here too, so the last iteration's work is reflected
+# even when the run ends on the cap rather than the drain exit (which has its own sync above).
+log "reached MAX_ITERS=$MAX_ITERS — stopping"; run_hook exhausted max-iters; board; sync_primary_checkout; exit 4
