@@ -13,30 +13,35 @@ final class SimulatedProvidersTests: XCTestCase {
         }
     }
 
-    func testGreatScenarioEmitsAlternatingSamples() async {
+    func testGreatScenarioEmitsContinuousDownloadChunkStream() async {
         let sampler = SimulatedSampler(scenario: .great)
         var collected: [ThroughputSample] = []
 
         let task = Task { @MainActor in
             for await sample in sampler.samples() {
                 collected.append(sample)
-                if collected.count >= 4 {
+                if collected.count >= 24 {
                     break
                 }
             }
         }
 
-        await waitUntil { collected.count >= 4 }
+        await waitUntil { collected.count >= 24 }
         task.cancel()
 
-        XCTAssertEqual(collected.count, 4)
-        XCTAssertEqual(collected[0].direction, .download)
-        XCTAssertEqual(collected[1].direction, .upload)
-        XCTAssertEqual(collected[2].direction, .download)
-        XCTAssertEqual(collected[3].direction, .upload)
-        for sample in collected {
+        XCTAssertGreaterThanOrEqual(collected.count, 24)
+
+        let downloadSamples = collected.filter { $0.direction == .download }
+        // A per-probe cadence would surface at most one download sample per upload sample; a
+        // continuous chunk stream surfaces many more download chunks than that.
+        XCTAssertGreaterThan(downloadSamples.count, collected.count / 2)
+
+        for sample in downloadSamples {
             XCTAssertGreaterThan(sample.byteCount, 0)
-            XCTAssertEqual(sample.transferDuration, .milliseconds(180))
+        }
+
+        for (previous, next) in zip(downloadSamples, downloadSamples.dropFirst()) {
+            XCTAssertLessThanOrEqual(previous.endedAt, next.endedAt)
         }
     }
 

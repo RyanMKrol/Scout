@@ -7,6 +7,15 @@ public final class SimulatedSampler: ThroughputSampling {
         self.scenario = scenario
     }
 
+    /// How often a download chunk sample is emitted: fast enough to look like a continuous stream
+    /// (T045 replaces the old once-per-probe cadence), not tied to the walk's own update pace.
+    private static let chunkInterval: Duration = .milliseconds(40)
+    /// The download-rate random walk still advances on the old ~240ms cadence; every chunk in
+    /// between reuses the current walked value, matching how a real continuous transfer's rate
+    /// only meaningfully changes every so often even though bytes arrive every tick.
+    private static let downloadWalkEveryNTicks = 6
+    private static let uploadEveryNTicks = 6
+
     public func samples() -> AsyncStream<ThroughputSample> {
         let scenario = scenario
         return AsyncStream { continuation in
@@ -17,27 +26,28 @@ public final class SimulatedSampler: ThroughputSampling {
             let task = Task {
                 var rng = SystemRandomNumberGenerator()
                 var downloadMbps = ScenarioWalk.initialDownloadMbps(scenario)
-                var direction: TransferDirection = .download
+                var tickIndex = 0
 
                 while !Task.isCancelled {
-                    try? await ContinuousClock().sleep(for: .milliseconds(250))
+                    try? await ContinuousClock().sleep(for: Self.chunkInterval)
                     guard !Task.isCancelled else {
                         break
                     }
 
-                    let mbps: Double
-                    switch direction {
-                    case .download:
+                    if tickIndex.isMultiple(of: Self.downloadWalkEveryNTicks) {
                         downloadMbps = ScenarioWalk.nextDownloadMbps(
                             previous: downloadMbps, scenario: scenario, using: &rng
                         )
-                        mbps = downloadMbps
-                    case .upload:
-                        mbps = ScenarioWalk.uploadMbps(forDownload: downloadMbps, using: &rng)
                     }
 
-                    continuation.yield(Self.sample(direction: direction, mbps: mbps))
-                    direction = direction == .download ? .upload : .download
+                    continuation.yield(Self.downloadChunkSample(mbps: downloadMbps))
+
+                    if tickIndex.isMultiple(of: Self.uploadEveryNTicks) {
+                        let uploadMbps = ScenarioWalk.uploadMbps(forDownload: downloadMbps, using: &rng)
+                        continuation.yield(Self.uploadSample(mbps: uploadMbps))
+                    }
+
+                    tickIndex += 1
                 }
             }
 
@@ -47,9 +57,19 @@ public final class SimulatedSampler: ThroughputSampling {
         }
     }
 
-    private static func sample(direction: TransferDirection, mbps: Double) -> ThroughputSample {
+    private static func downloadChunkSample(mbps: Double) -> ThroughputSample {
+        let byteCount = max(1, Int(mbps * 1_000_000 * 0.04 / 8))
+        return ThroughputSample(
+            direction: .download,
+            byteCount: byteCount,
+            transferDuration: chunkInterval,
+            endedAt: ContinuousClock().now
+        )
+    }
+
+    private static func uploadSample(mbps: Double) -> ThroughputSample {
         ThroughputSample(
-            direction: direction,
+            direction: .upload,
             byteCount: Int(mbps * 1_000_000 * 0.18 / 8),
             transferDuration: .milliseconds(180),
             endedAt: ContinuousClock().now

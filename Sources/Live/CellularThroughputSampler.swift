@@ -1,60 +1,84 @@
 import Foundation
 import Network
 
-/// Download-biased probe direction sequence: 3 download probes per 1 upload probe (every 4th
-/// probe is upload), so the hero download reading refreshes far more often than the upload figure.
-enum ProbeSchedule {
-    static func direction(forProbeIndex index: Int) -> TransferDirection {
-        (index + 1).isMultiple(of: 4) ? .upload : .download
-    }
-}
-
-/// Live measurement engine: forces every probe over `.cellular` via `NetworkConnection` (the only
-/// public API that can pin an interface) and runs a download-biased schedule of paced probes
-/// against Cloudflare's speed endpoints. Untestable in CI/Simulator (no cellular radio) — see the
-/// worklog for what only the device gate can verify.
+/// Live measurement engine: forces the transfer over `.cellular` via `NetworkConnection` (the only
+/// public API that can pin an interface) and runs ONE continuous, unbounded download stream against
+/// Cloudflare's speed endpoint — emitting a `ThroughputSample` per received chunk so a rolling window
+/// can compute a true wall-clock rate, rather than pacing discrete request/response probes with gaps
+/// between them. Upload is not sampled here (see T048). Untestable in CI/Simulator (no cellular
+/// radio) — see the worklog for what only the device gate can verify.
 final class CellularThroughputSampler: ThroughputSampling {
     init() {}
 
     func samples() -> AsyncStream<ThroughputSample> {
         AsyncStream { continuation in
             let task = Task {
-                var connection = Self.makeConnection()
-                var probeIndex = 0
-                var lastProbeStartedAt: ContinuousClock.Instant?
-
-                while !Task.isCancelled {
-                    let delay = ProbePacer.delayBeforeNextProbe(
-                        lastProbeStartedAt: lastProbeStartedAt, now: ContinuousClock().now
-                    )
-                    if delay > .zero {
-                        do {
-                            try await ContinuousClock().sleep(for: delay)
-                        } catch {
-                            break
-                        }
-                    }
-                    guard !Task.isCancelled else { break }
-
-                    lastProbeStartedAt = ContinuousClock().now
-                    let direction = ProbeSchedule.direction(forProbeIndex: probeIndex)
-                    do {
-                        let sample = try await Self.runProbe(direction: direction, on: connection)
-                        continuation.yield(sample)
-                        probeIndex += 1
-                    } catch {
-                        connection = Self.makeConnection()
-                        do {
-                            try await ContinuousClock().sleep(for: .seconds(1))
-                        } catch {
-                            break
-                        }
-                    }
-                }
+                await Self.runContinuousDownloadLoop(continuation: continuation)
             }
 
             continuation.onTermination = { _ in
                 task.cancel()
+            }
+        }
+    }
+
+    private static let receiveChunkCap = 262_144
+
+    private static func runContinuousDownloadLoop(
+        continuation: AsyncStream<ThroughputSample>.Continuation
+    ) async {
+        var connection = makeConnection()
+
+        while !Task.isCancelled {
+            do {
+                try await streamDownload(on: connection, continuation: continuation)
+            } catch {
+                guard !Task.isCancelled else {
+                    break
+                }
+                connection = makeConnection()
+                do {
+                    try await ContinuousClock().sleep(for: .seconds(1))
+                } catch {
+                    break
+                }
+            }
+        }
+    }
+
+    /// Streams a single HTTP body to completion, yielding one `ThroughputSample` per received
+    /// chunk. If the fixed-size body ends before the caller stops consuming, transparently issues
+    /// another request on the same connection so the overall stream is effectively unbounded.
+    private static func streamDownload(
+        on connection: NetworkConnection<TLS>,
+        continuation: AsyncStream<ThroughputSample>.Continuation
+    ) async throws {
+        var parser = HTTPResponseParser()
+        var lastChunkAt = ContinuousClock().now
+
+        try await connection.send(HTTPProbeRequest.download())
+
+        while !Task.isCancelled {
+            let msg = try await connection.receive(atLeast: 1, atMost: receiveChunkCap)
+            let events = try parser.feed(msg.content)
+
+            for event in events {
+                switch event {
+                case .headersComplete, .needMoreData:
+                    break
+                case let .bodyProgress(newBodyBytes):
+                    let now = ContinuousClock().now
+                    continuation.yield(ThroughputSample(
+                        direction: .download,
+                        byteCount: newBodyBytes,
+                        transferDuration: lastChunkAt.duration(to: now),
+                        endedAt: now
+                    ))
+                    lastChunkAt = now
+                case .responseComplete:
+                    try await connection.send(HTTPProbeRequest.download())
+                    parser = HTTPResponseParser()
+                }
             }
         }
     }
@@ -66,67 +90,5 @@ final class CellularThroughputSampler: ThroughputSampling {
                 .requiredInterfaceType(.cellular)
                 .multipathServiceType(.disabled)
         )
-    }
-
-    private static func runProbe(
-        direction: TransferDirection, on connection: NetworkConnection<TLS>
-    ) async throws -> ThroughputSample {
-        switch direction {
-        case .download:
-            try await runDownloadProbe(on: connection)
-        case .upload:
-            try await runUploadProbe(on: connection)
-        }
-    }
-
-    private static func runDownloadProbe(
-        on connection: NetworkConnection<TLS>
-    ) async throws -> ThroughputSample {
-        let start = ContinuousClock().now
-        try await connection.send(HTTPProbeRequest.download())
-        let contentLength = try await receiveUntilComplete(on: connection)
-        let endedAt = ContinuousClock().now
-        return ThroughputSample(
-            direction: .download,
-            byteCount: contentLength,
-            transferDuration: start.duration(to: endedAt),
-            endedAt: endedAt
-        )
-    }
-
-    private static func runUploadProbe(
-        on connection: NetworkConnection<TLS>
-    ) async throws -> ThroughputSample {
-        let start = ContinuousClock().now
-        try await connection.send(HTTPProbeRequest.uploadHeader())
-        try await connection.send(HTTPProbeRequest.uploadBody())
-        _ = try await receiveUntilComplete(on: connection)
-        let endedAt = ContinuousClock().now
-        return ThroughputSample(
-            direction: .upload,
-            byteCount: HTTPProbeRequest.probeBytes,
-            transferDuration: start.duration(to: endedAt),
-            endedAt: endedAt
-        )
-    }
-
-    private static func receiveUntilComplete(on connection: NetworkConnection<TLS>) async throws -> Int {
-        var parser = HTTPResponseParser()
-        var contentLength = 0
-
-        while true {
-            let msg = try await connection.receive(atLeast: 1, atMost: 262_144)
-            let events = try parser.feed(msg.content)
-            for event in events {
-                switch event {
-                case let .headersComplete(_, length):
-                    contentLength = length ?? 0
-                case .responseComplete:
-                    return contentLength
-                case .needMoreData, .bodyProgress:
-                    break
-                }
-            }
-        }
     }
 }

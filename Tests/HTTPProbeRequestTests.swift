@@ -6,7 +6,7 @@ final class HTTPProbeRequestTests: XCTestCase {
     // MARK: - Request Builders
 
     func testDownloadRequestIsByteExact() {
-        let expected = "GET /__down?bytes=262144 HTTP/1.1\r\n" +
+        let expected = "GET /__down?bytes=1073741824 HTTP/1.1\r\n" +
             "Host: speed.cloudflare.com\r\n" +
             "Connection: keep-alive\r\n" +
             "\r\n"
