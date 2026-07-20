@@ -1203,7 +1203,7 @@
     {
       "id": "T048",
       "title": "Periodic upload bursts alongside the continuous download",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T045"
       ],
