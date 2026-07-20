@@ -1229,7 +1229,7 @@
     {
       "id": "T049",
       "title": "Uncap the readout and retune the dial scale to real speeds",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T047"
       ],
