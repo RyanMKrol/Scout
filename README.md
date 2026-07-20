@@ -43,16 +43,16 @@ whether your phone can actually do anything where you're standing.
 ### What we *can* surface
 
 - **Live throughput in Mbps** — both download (hero metric) and upload (secondary) — updated
-  ~4× per second on a rolling window.
-- **Deliberately capped at realistic limits:** downloads capped at 10 Mbps (displayed "10+"),
-  uploads capped at 5 Mbps (displayed "5+"). The product question is "is this spot good enough
-  to load a video / send messages?" — not "how fast exactly" — so we measure with small paced
-  transfers (~256 KB) to keep total data use roughly **30–60 MB per minute**, matching the
-  consent copy.
+  several times a second on a short wall-clock window (how many bytes actually arrived in the
+  last ~½ second).
+- **The real, uncapped number.** Scout shows the actual measured speed, however fast — a strong
+  5G spot reads its true tens-to-hundreds of Mbps, not a pegged "10+". Getting an honest reading
+  means running a **continuous download** while you sweep, so data use is high and scales with your
+  connection (see the data note below); upload is sampled in short periodic bursts.
 - **Quality bands** (download-driven): **Great** ≥ 6 Mbps, **Usable** ≥ 2 Mbps, **Poor** < 2 Mbps.
   Color + label always shown together.
 - **Radio generation** — whether you're currently on **5G NR, LTE, 3G**, etc., via
-  `CoreTelephony`. So the readout reads e.g. **"5G · 10+ Mbps"** with a quality label.
+  `CoreTelephony`. So the readout reads e.g. **"5G · 47 Mbps"** with a quality label.
 
 ### What we deliberately *cannot* surface
 
@@ -69,12 +69,13 @@ whether your phone can actually do anything where you're standing.
    signal, not your router. Uses `Network.framework`'s `NetworkConnection` with
    `requiredInterfaceType = .cellular` (iOS 26+). It transfers in both directions: measuring
    download from a remote server and upload back to it.
-2. **Paced, small transfers.** Rather than a continuous stream, Scout makes repeated small
-   transfers (~256 KB) at a measured pace, so total session data stays in the 30–60 MB/min range
-   and feels respectful of a metered plan.
-3. **Rolling-window rate.** Bytes-per-interval are converted to Mbps over a short sliding
-   window and pushed to the UI ~4× per second — smooth enough to feel real-time as you
-   walk.
+2. **Continuous download, measured live.** Scout streams a continuous download over the cellular
+   link (and samples upload in short periodic bursts), because a steady stream is the only way to
+   read the connection in true real time as you move. This is unbounded by design — see the data
+   note below.
+3. **Wall-clock window.** The bytes that actually arrived in the last ~½ second are converted to
+   Mbps and pushed to the UI several times a second — so the number tracks the signal live as you
+   sweep, instead of spiking and collapsing.
 4. **Radio label.** `CoreTelephony`'s current radio-access-technology is read alongside so
    the number is tagged with 5G / LTE / etc.
 5. **Foreground-only.** The moment the app backgrounds, all transfers stop immediately.
@@ -96,9 +97,12 @@ Measuring throughput requires endpoints to transfer to/from.
 
 Because the measurement is an *active* data transfer, not a passive read:
 
-- **It uses cellular data.** Paced transfers stay roughly 30–60 MB per minute. Scout shows
-  a **visible session data counter** and the first-run consent is explicit about data use and
-  metered plans.
+- **It uses cellular data — a lot of it.** The continuous download uses as much data as your
+  connection allows: modest on a weak signal, **potentially hundreds of MB per minute on a fast
+  one**. Scout shows a **visible session data counter**, pausing or stopping halts data use
+  instantly, and a **safety backstop auto-stops the sweep after ~500 MB or ~5 minutes** so a
+  forgotten session can't silently burn through a data plan. The first-run consent is explicit
+  about all of this.
 - **Battery.** Sustained radio + screen use. Scout is a "run it for a couple of minutes
   while I find the spot" tool, not a background monitor.
 - **P0 rule — no background running.** The moment the app leaves the foreground (backgrounded,
@@ -122,8 +126,9 @@ is already measuring (once first-run consent is given).
   session, always visible.
 - **Automatic measurement** — no Start/Stop buttons. The app measures whenever this screen is
   foreground; transfers stop immediately on background/lock.
-- A **first-run consent flow** that's honest: throughput (not bars), dual measurement, 30–60 MB/min
-  data budget, and the promise "only while the screen is on."
+- A **first-run consent flow** that's honest: throughput (not bars), dual measurement, continuous
+  and connection-dependent data use with a safety auto-stop, and the promise "only while the screen
+  is on."
 - **Three screen states:** Splash (cold launch), First-run consent (once), Measuring (home), plus a
   fallback "No cellular" state for Airplane mode / Wi-Fi-only.
 

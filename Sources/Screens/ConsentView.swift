@@ -36,9 +36,16 @@ struct ConsentView: View {
                         VStack(spacing: 18) {
                             bulletPoint(
                                 text: attributedBulletText(
-                                    normal: "Roughly ",
-                                    bold: "30–60 MB per minute",
-                                    normalEnd: ", always shown on screen."
+                                    normal: "It streams continuously, so it uses as much data as your connection allows — ",
+                                    bold: "potentially hundreds of MB a minute",
+                                    normalEnd: " on a fast signal. The running total is always on screen."
+                                )
+                            )
+
+                            bulletPoint(
+                                text: Text(
+                                    "Pausing or stopping halts data use instantly, and Scout " +
+                                        "auto-stops itself after about 5 minutes or 500 MB."
                                 )
                             )
 
