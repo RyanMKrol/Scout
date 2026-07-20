@@ -274,12 +274,12 @@ final class SweepSessionTests: XCTestCase {
         session.start()
         await waitUntil { sampler.subscribeCount == 1 }
 
-        // Two samples land close together: an older one at `start` and a newer, faster one
-        // 300ms later. Both are resident in the (600ms) window, so the published rate is their
-        // combined average.
+        // Two samples land close together: an older one at `start` and a newer one 200ms later.
+        // Both are resident in the (500ms) wall-clock window, so the published rate is their
+        // combined bytes divided by the elapsed span since the older sample.
         sampler.yield(
             ThroughputSample(
-                direction: .download, byteCount: 50000, transferDuration: .milliseconds(100),
+                direction: .download, byteCount: 12500, transferDuration: .milliseconds(100),
                 endedAt: start
             )
         )
@@ -287,21 +287,25 @@ final class SweepSessionTests: XCTestCase {
 
         sampler.yield(
             ThroughputSample(
-                direction: .download, byteCount: 100_000, transferDuration: .milliseconds(100),
-                endedAt: start.advanced(by: .milliseconds(300))
+                direction: .download, byteCount: 137_500, transferDuration: .milliseconds(100),
+                endedAt: start.advanced(by: .milliseconds(200))
             )
         )
-        await waitUntil { session.downloadMbps > 4.0 }
+        // (12500 + 137500) bytes × 8 / 1e6 / 0.2s elapsed = 6.0 Mbps.
+        await waitUntil { session.downloadMbps > 2.0 }
         XCTAssertEqual(session.downloadMbps, 6.0, accuracy: 0.001)
 
-        // No new probe arrives. Advance the injected clock (well under the staleness threshold)
-        // so the older sample ages out of the window; the next tick should recompute from the
-        // window's remaining sample and republish, without any fresh probe.
-        clock.advance(by: .milliseconds(650))
+        // No new probe arrives. Advance the injected clock to 600ms since `start` (well under the
+        // staleness threshold) so the older sample ages out of the window; the next tick should
+        // recompute from the window's remaining sample and republish, without any fresh probe.
+        clock.advance(by: .milliseconds(600))
         XCTAssertLessThan(clock.now() - start, SweepSession.stalenessThreshold)
 
-        await waitUntil { session.downloadMbps > 6.5 }
-        XCTAssertEqual(session.downloadMbps, 8.0, accuracy: 0.001)
+        // Only the second sample remains: 137,500 bytes × 8 / 1e6 / 0.4s elapsed = 2.75 Mbps.
+        // (The combined 6.0 reading above may land as 5.999999999999999 due to floating-point
+        // rounding, so compare against a threshold well clear of it rather than < 6.0.)
+        await waitUntil { session.downloadMbps < 5.5 }
+        XCTAssertEqual(session.downloadMbps, 2.75, accuracy: 0.001)
         XCTAssertFalse(session.isStalled)
 
         session.stop()
@@ -310,7 +314,7 @@ final class SweepSessionTests: XCTestCase {
         // waiting must NOT change the published value any further.
         clock.advance(by: .milliseconds(650))
         try? await Task.sleep(for: .milliseconds(400))
-        XCTAssertEqual(session.downloadMbps, 8.0, accuracy: 0.001)
+        XCTAssertEqual(session.downloadMbps, 2.75, accuracy: 0.001)
     }
 
     func testCellularAvailableAgainResubscribesSampler() async {
@@ -345,12 +349,14 @@ final class SweepSessionTests: XCTestCase {
 
         sampler.yield(
             ThroughputSample(
-                direction: .download, byteCount: 100_000, transferDuration: .milliseconds(200),
+                direction: .download, byteCount: 25000, transferDuration: .milliseconds(200),
                 endedAt: ContinuousClock().now
             )
         )
         await waitUntil { session.downloadMbps > 0 }
         let frozenValue = session.downloadMbps
+        // A single sample with a near-zero elapsed span falls back to the minimum divisor floor
+        // (50ms): 25,000 bytes × 8 / 1e6 / 0.05s = 4.0 Mbps.
         XCTAssertEqual(frozenValue, 4.0, accuracy: 0.001)
 
         session.pause()

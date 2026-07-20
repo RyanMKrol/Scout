@@ -3,13 +3,17 @@ import Foundation
 public struct ThroughputWindow: Sendable {
     private struct Sample {
         let byteCount: Int
-        let transferDuration: Duration
         let endedAt: ContinuousClock.Instant
     }
 
-    /// Recency window for the live-sweep reading: short enough that moving the phone to a new
-    /// spot is reflected within about a second, per T037.
-    public nonisolated static let liveWindow: Duration = .milliseconds(600)
+    /// Recency window for the live-sweep reading: a true wall-clock rate over the trailing
+    /// half-second, so the reading reflects how many bytes actually arrived per second — not the
+    /// burst rate of whichever chunk happened to finish fastest.
+    public nonisolated static let liveWindow: Duration = .milliseconds(500)
+
+    /// Floor for the elapsed-span divisor so a just-started stream (elapsed ≈ 0) doesn't blow up
+    /// toward infinity.
+    private nonisolated static let minimumDivisorSeconds: Double = 0.05
 
     private var samples: [Sample] = []
     private let window: Duration
@@ -19,14 +23,14 @@ public struct ThroughputWindow: Sendable {
     }
 
     public nonisolated mutating func record(
-        byteCount: Int, transferDuration: Duration,
+        byteCount: Int, transferDuration _: Duration,
         endedAt: ContinuousClock.Instant
     ) {
-        guard byteCount > 0, transferDuration > .zero else {
+        guard byteCount > 0 else {
             return
         }
 
-        let newSample = Sample(byteCount: byteCount, transferDuration: transferDuration, endedAt: endedAt)
+        let newSample = Sample(byteCount: byteCount, endedAt: endedAt)
         samples.append(newSample)
         evictStalesamples(at: endedAt)
     }
@@ -34,22 +38,19 @@ public struct ThroughputWindow: Sendable {
     public nonisolated mutating func megabitsPerSecond(at now: ContinuousClock.Instant) -> Double? {
         evictStalesamples(at: now)
 
-        guard !samples.isEmpty else {
+        guard let oldestSampleInstant = samples.map(\.endedAt).min() else {
             return nil
         }
 
         let totalBytes = samples.reduce(0) { $0 + $1.byteCount }
-        let totalDuration = samples.reduce(Duration.zero) { $0 + $1.transferDuration }
-
-        guard totalDuration > .zero else {
-            return nil
-        }
-
         let totalBits = Double(totalBytes * 8)
-        let totalSeconds = totalDuration.timeInterval
         let megabits = totalBits / 1_000_000
 
-        return megabits / totalSeconds
+        let windowSeconds = window.timeInterval
+        let elapsedSeconds = (now - oldestSampleInstant).timeInterval
+        let divisorSeconds = min(windowSeconds, max(elapsedSeconds, Self.minimumDivisorSeconds))
+
+        return megabits / divisorSeconds
     }
 
     private nonisolated mutating func evictStalesamples(at now: ContinuousClock.Instant) {
