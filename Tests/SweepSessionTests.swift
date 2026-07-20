@@ -317,6 +317,55 @@ final class SweepSessionTests: XCTestCase {
         XCTAssertEqual(session.downloadMbps, 2.75, accuracy: 0.001)
     }
 
+    func testContinuousChunkStreamKeepsLiveReadingAndStalenessOnlyFiresOnGenuineGap() async {
+        let sampler = FakeThroughputSampler()
+        let radio = FakeRadioInfoProvider()
+        let path = FakeCellularPathMonitor()
+        let clock = ManualClock()
+        let session = SweepSession(sampler: sampler, radio: radio, path: path, now: clock.now)
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        // Simulate a continuous streaming sampler: many small chunks landing close together,
+        // like T045's per-chunk emission, rather than one or two discrete probes.
+        let chunkBytes = 2500
+        let chunkInterval = Duration.milliseconds(50)
+        for _ in 0 ..< 10 {
+            sampler.yield(
+                ThroughputSample(
+                    direction: .download, byteCount: chunkBytes, transferDuration: .zero,
+                    endedAt: clock.now()
+                )
+            )
+            clock.advance(by: chunkInterval)
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+
+        await waitUntil { session.downloadMbps > 0 }
+        XCTAssertFalse(session.isStalled)
+        XCTAssertEqual(session.sessionDownloadBytes, Int64(chunkBytes * 10))
+
+        // A brief gap well under the staleness threshold must NOT collapse the reading to zero:
+        // the wall-clock window keeps reporting a live rate on the 250ms display tick, recomputed
+        // from the window rather than only from the last `record()` call.
+        clock.advance(by: .milliseconds(300))
+        try? await Task.sleep(for: .milliseconds(400))
+        XCTAssertFalse(session.isStalled)
+        XCTAssertGreaterThan(session.downloadMbps, 0)
+
+        // Chunks genuinely stop arriving: advance the injected clock well past the stall
+        // threshold plus the decay window. Only now must isStalled fire and the reading decay
+        // fully to zero — a true "dead spot", not a firing between normal continuous reads.
+        clock.advance(by: SweepSession.stalenessThreshold + SweepSession.stalenessDecayDuration)
+        await waitUntil { session.isStalled }
+        XCTAssertTrue(session.isStalled)
+        await waitUntil { session.downloadMbps == 0 }
+        XCTAssertEqual(session.downloadMbps, 0)
+
+        session.stop()
+    }
+
     func testCellularAvailableAgainResubscribesSampler() async {
         let sampler = FakeThroughputSampler()
         let radio = FakeRadioInfoProvider()
