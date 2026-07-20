@@ -206,7 +206,7 @@ public final class SweepSession {
                 endedAt: sample.endedAt
             )
             let value = downloadWindow.megabitsPerSecond(at: sample.endedAt) ?? 0
-            downloadMbps = min(value, ScoutMeter.downloadCapMbps)
+            downloadMbps = value
             quality = SignalQuality(downloadMbps: downloadMbps)
             sessionDownloadBytes += Int64(sample.byteCount)
         case .upload:
@@ -216,7 +216,7 @@ public final class SweepSession {
                 endedAt: sample.endedAt
             )
             let value = uploadWindow.megabitsPerSecond(at: sample.endedAt) ?? 0
-            uploadMbps = min(value, ScoutMeter.uploadCapMbps)
+            uploadMbps = value
             sessionUploadBytes += Int64(sample.byteCount)
         }
 
@@ -237,12 +237,12 @@ public final class SweepSession {
         let at = now()
 
         if let value = downloadWindow.megabitsPerSecond(at: at) {
-            downloadMbps = min(value, ScoutMeter.downloadCapMbps)
+            downloadMbps = value
             quality = SignalQuality(downloadMbps: downloadMbps)
         }
 
         if let value = uploadWindow.megabitsPerSecond(at: at) {
-            uploadMbps = min(value, ScoutMeter.uploadCapMbps)
+            uploadMbps = value
         }
     }
 

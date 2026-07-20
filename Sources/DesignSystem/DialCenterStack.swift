@@ -138,8 +138,8 @@ private struct HeroText: View {
         ScoutTheme.background
         DialCenterStack(
             mode: .live(DialContent(
-                downDisplay: "10+",
-                upDisplay: "5+",
+                downDisplay: "142",
+                upDisplay: "48",
                 downFraction: 1.0,
                 upFraction: 1.0,
                 qualityColor: ScoutTheme.great,

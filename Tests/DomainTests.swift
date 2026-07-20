@@ -54,16 +54,18 @@ final class DomainTests: XCTestCase {
             (0, "0.0"),
             (7.42, "7.4"),
             (9.94, "9.9"),
-            (9.95, "10+"),
-            (12, "10+"),
+            (9.95, "10"),
+            (12, "12"),
             (-1.0, "0.0"),
             (-5.5, "0.0"),
             (1.0, "1.0"),
             (2.5, "2.5"),
             (5.0, "5.0"),
-            (9.999, "10+"),
-            (10.0, "10+"),
-            (100.0, "10+"),
+            (9.999, "10"),
+            (10.0, "10"),
+            (42.5, "43"),
+            (100.0, "100"),
+            (350.0, "350"),
         ]
 
         for (mbps, expectedDisplay) in testCases {
@@ -81,16 +83,16 @@ final class DomainTests: XCTestCase {
         let testCases: [(Double, String)] = [
             (0, "0.0"),
             (4.94, "4.9"),
-            (4.95, "5+"),
-            (7, "5+"),
+            (4.95, "5.0"),
+            (7, "7.0"),
             (-1.0, "0.0"),
             (-5.5, "0.0"),
             (1.0, "1.0"),
             (2.5, "2.5"),
-            (5.0, "5+"),
-            (4.999, "5+"),
-            (6.0, "5+"),
-            (100.0, "5+"),
+            (5.0, "5.0"),
+            (9.95, "10"),
+            (18.5, "19"),
+            (100.0, "100"),
         ]
 
         for (mbps, expectedDisplay) in testCases {
@@ -132,9 +134,8 @@ final class DomainTests: XCTestCase {
     func testDownloadArcFraction() {
         let testCases: [(Double, Double)] = [
             (0, 0.04),
-            (10, 1.0),
-            (12, 1.0),
-            (100, 1.0),
+            (300, 1.0),
+            (500, 1.0),
             (-1, 0.04),
             (-100, 0.04),
         ]
@@ -146,10 +147,13 @@ final class DomainTests: XCTestCase {
                 "downloadArcFraction for \(mbps) should be \(expectedFraction)"
             )
         }
+
+        XCTAssertGreaterThan(ScoutMeter.downloadArcFraction(10), 0.04)
+        XCTAssertLessThan(ScoutMeter.downloadArcFraction(10), 1.0)
     }
 
     func testDownloadArcFractionMonotonicallyIncreasing() {
-        let samples = [0.5, 1.0, 2.0, 5.0, 10.0]
+        let samples = [0.5, 1.0, 2.0, 5.0, 10.0, 40.0, 100.0, 300.0]
         var previousFraction: Double?
 
         for sample in samples {
@@ -169,9 +173,8 @@ final class DomainTests: XCTestCase {
     func testUploadArcFraction() {
         let testCases: [(Double, Double)] = [
             (0, 0.04),
-            (5, 1.0),
-            (7, 1.0),
             (100, 1.0),
+            (200, 1.0),
             (-1, 0.04),
             (-100, 0.04),
         ]
@@ -183,10 +186,13 @@ final class DomainTests: XCTestCase {
                 "uploadArcFraction for \(mbps) should be \(expectedFraction)"
             )
         }
+
+        XCTAssertGreaterThan(ScoutMeter.uploadArcFraction(5), 0.04)
+        XCTAssertLessThan(ScoutMeter.uploadArcFraction(5), 1.0)
     }
 
     func testUploadArcFractionMonotonicallyIncreasing() {
-        let samples = [0.5, 1.0, 2.0, 5.0, 7.0]
+        let samples = [0.5, 1.0, 2.0, 5.0, 7.0, 20.0, 50.0, 100.0]
         var previousFraction: Double?
 
         for sample in samples {
@@ -204,7 +210,27 @@ final class DomainTests: XCTestCase {
     // MARK: - ScoutMeter Constants
 
     func testScoutMeterConstants() {
-        XCTAssertEqual(ScoutMeter.downloadCapMbps, 10.0)
-        XCTAssertEqual(ScoutMeter.uploadCapMbps, 5.0)
+        XCTAssertEqual(ScoutMeter.downloadScaleMbps, 300.0)
+        XCTAssertEqual(ScoutMeter.uploadScaleMbps, 100.0)
+    }
+
+    // MARK: - Quality bands still classify correctly against uncapped values
+
+    func testSignalQualityAgainstUncappedValues() {
+        let testCases: [(Double, SignalQuality)] = [
+            (42.5, .great),
+            (100.0, .great),
+            (6.0, .great),
+            (5.99, .usable),
+            (2.0, .usable),
+            (1.99, .poor),
+        ]
+
+        for (mbps, expectedQuality) in testCases {
+            XCTAssertEqual(
+                SignalQuality(downloadMbps: mbps), expectedQuality,
+                "SignalQuality for uncapped \(mbps) Mbps should be \(expectedQuality)"
+            )
+        }
     }
 }

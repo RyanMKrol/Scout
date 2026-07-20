@@ -16,28 +16,28 @@ final class AccessibilitySummaryTests: XCTestCase {
         XCTAssertEqual(result, expected)
     }
 
-    func testCappedDownload() {
+    func testUncappedDownload() {
         let result = AccessibilitySummary.value(
-            downloadMbps: 10.5,
+            downloadMbps: 42.5,
             uploadMbps: 2.0,
             generation: .lte,
             quality: .great,
             downloadBytes: 1_000_000,
             uploadBytes: 500_000
         )
-        XCTAssertTrue(result.contains("more than 10 megabits per second down"))
+        XCTAssertTrue(result.contains("43 megabits per second down"))
     }
 
-    func testCappedUpload() {
+    func testUncappedUpload() {
         let result = AccessibilitySummary.value(
             downloadMbps: 5.0,
-            uploadMbps: 5.5,
+            uploadMbps: 18.5,
             generation: .threeG,
             quality: .usable,
             downloadBytes: 2_000_000,
             uploadBytes: 1_000_000
         )
-        XCTAssertTrue(result.contains("more than 5 megabits per second up"))
+        XCTAssertTrue(result.contains("19 megabits per second up"))
     }
 
     func testUnknownGeneration() {

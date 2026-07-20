@@ -24,18 +24,18 @@ final class AccessibilityTests: XCTestCase {
         XCTAssertTrue(summary.contains("used this session"))
     }
 
-    func testAccessibilitySummaryAtCapMbps() {
+    func testAccessibilitySummaryAboveOldCapMbps() {
         let summary = AccessibilitySummary.value(
-            downloadMbps: 10.5,
-            uploadMbps: 5.5,
+            downloadMbps: 42.5,
+            uploadMbps: 18.5,
             generation: .lte,
             quality: .great,
             downloadBytes: 5_000_000,
             uploadBytes: 2_000_000
         )
 
-        XCTAssertTrue(summary.contains("more than 10 megabits per second down"))
-        XCTAssertTrue(summary.contains("more than 5 megabits per second up"))
+        XCTAssertTrue(summary.contains("43 megabits per second down"))
+        XCTAssertTrue(summary.contains("19 megabits per second up"))
     }
 
     func testAccessibilitySummaryWithUnknownGeneration() {

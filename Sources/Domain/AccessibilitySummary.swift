@@ -52,17 +52,11 @@ enum AccessibilitySummary {
     }
 
     private nonisolated static func formatDownload(_ mbps: Double) -> String {
-        if mbps >= ScoutMeter.downloadCapMbps {
-            return "more than 10 megabits per second down"
-        }
         let rounded = Int(mbps.rounded())
         return "\(rounded) megabits per second down"
     }
 
     private nonisolated static func formatUpload(_ mbps: Double) -> String {
-        if mbps >= ScoutMeter.uploadCapMbps {
-            return "more than 5 megabits per second up"
-        }
         let rounded = Int(mbps.rounded())
         return "\(rounded) megabits per second up"
     }

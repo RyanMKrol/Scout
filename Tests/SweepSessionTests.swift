@@ -82,7 +82,7 @@ final class SweepSessionTests: XCTestCase {
         }
     }
 
-    func testDownloadSampleCapsAndUpdatesQualityAndBytes() async {
+    func testDownloadSampleUpdatesQualityAndBytes() async {
         let sampler = FakeThroughputSampler()
         let radio = FakeRadioInfoProvider()
         let path = FakeCellularPathMonitor()
@@ -100,7 +100,7 @@ final class SweepSessionTests: XCTestCase {
 
         await waitUntil { session.downloadMbps > 0 }
 
-        XCTAssertEqual(session.downloadMbps, 10.0, accuracy: 0.001)
+        XCTAssertEqual(session.downloadMbps, 40.0, accuracy: 0.001)
         XCTAssertEqual(session.quality, .great)
         XCTAssertEqual(session.sessionDownloadBytes, 250_000)
         XCTAssertEqual(session.sessionUploadBytes, 0)
@@ -109,7 +109,7 @@ final class SweepSessionTests: XCTestCase {
         session.stop()
     }
 
-    func testUploadSampleLandsInUploadOnlyAndIsCapped() async {
+    func testUploadSampleLandsInUploadOnlyAndIsUncapped() async {
         let sampler = FakeThroughputSampler()
         let radio = FakeRadioInfoProvider()
         let path = FakeCellularPathMonitor()
@@ -127,7 +127,7 @@ final class SweepSessionTests: XCTestCase {
 
         await waitUntil { session.uploadMbps > 0 }
 
-        XCTAssertEqual(session.uploadMbps, ScoutMeter.uploadCapMbps, accuracy: 0.001)
+        XCTAssertEqual(session.uploadMbps, 160.0, accuracy: 0.001)
         XCTAssertEqual(session.sessionUploadBytes, 1_000_000)
         XCTAssertEqual(session.sessionDownloadBytes, 0)
         XCTAssertEqual(session.downloadMbps, 0)
@@ -237,7 +237,7 @@ final class SweepSessionTests: XCTestCase {
             )
         )
         await waitUntil { session.downloadMbps > 0 }
-        XCTAssertEqual(session.downloadMbps, 10.0, accuracy: 0.001)
+        XCTAssertEqual(session.downloadMbps, 40.0, accuracy: 0.001)
         XCTAssertFalse(session.isStalled)
 
         // No fresh sample arrives: advance the injected clock well past the staleness
@@ -249,7 +249,10 @@ final class SweepSessionTests: XCTestCase {
         await waitUntil { session.downloadMbps == 0 }
         XCTAssertEqual(session.downloadMbps, 0)
 
-        // A fresh sample immediately clears the stalled state.
+        // A fresh sample immediately clears the stalled state. The exact resulting Mbps depends
+        // on real wall-clock spacing between this sample and the prior one still in the rolling
+        // window (the sample's `endedAt` is real time, independent of the injected staleness
+        // clock), so assert the reading resumes rather than pin a timing-sensitive number.
         sampler.yield(
             ThroughputSample(
                 direction: .download, byteCount: 250_000, transferDuration: .milliseconds(200),
@@ -258,7 +261,7 @@ final class SweepSessionTests: XCTestCase {
         )
         await waitUntil { !session.isStalled }
         XCTAssertFalse(session.isStalled)
-        XCTAssertEqual(session.downloadMbps, 10.0, accuracy: 0.001)
+        XCTAssertGreaterThan(session.downloadMbps, 0)
 
         session.stop()
     }
