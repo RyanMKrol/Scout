@@ -6,11 +6,19 @@ final class HTTPProbeRequestTests: XCTestCase {
     // MARK: - Request Builders
 
     func testDownloadRequestIsByteExact() {
-        let expected = "GET /__down?bytes=1073741824 HTTP/1.1\r\n" +
+        let expected = "GET /__down?bytes=90000000 HTTP/1.1\r\n" +
             "Host: speed.cloudflare.com\r\n" +
             "Connection: keep-alive\r\n" +
             "\r\n"
         XCTAssertEqual(HTTPProbeRequest.download(), Data(expected.utf8))
+    }
+
+    /// Regression guard: Cloudflare's `/__down` 403s any request for ≥ 100 MB, which silently
+    /// killed the download stream (every request rejected → parser throws → infinite reconnect →
+    /// download meter stuck at 0). The requested size must stay under that hard cap.
+    func testDownloadBytesIsWithinCloudflareAcceptedRange() {
+        XCTAssertGreaterThan(HTTPProbeRequest.downloadBytes, 0)
+        XCTAssertLessThan(HTTPProbeRequest.downloadBytes, 100_000_000)
     }
 
     func testUploadHeaderIsByteExact() {
