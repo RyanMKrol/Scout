@@ -1124,7 +1124,7 @@
     {
       "id": "T045",
       "title": "Continuous streaming download sampler (replace discrete paced probes)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
