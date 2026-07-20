@@ -1175,7 +1175,7 @@
     {
       "id": "T047",
       "title": "Wire continuous samples through SweepSession (live wall-clock reading)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T045",
         "T046"
