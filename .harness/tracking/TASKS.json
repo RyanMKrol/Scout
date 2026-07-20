@@ -1256,7 +1256,7 @@
     {
       "id": "T050",
       "title": "Session data/time auto-stop backstop",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T045"
       ],
