@@ -14,7 +14,8 @@ public final class SimulatedSampler: ThroughputSampling {
     /// between reuses the current walked value, matching how a real continuous transfer's rate
     /// only meaningfully changes every so often even though bytes arrive every tick.
     private static let downloadWalkEveryNTicks = 6
-    private static let uploadEveryNTicks = 6
+    /// Periodic upload bursts emit every ~3 seconds (T048), matching the live PeriodicUploadBurster.
+    private static let uploadBurstInterval: Duration = .seconds(3)
 
     public func samples() -> AsyncStream<ThroughputSample> {
         let scenario = scenario
@@ -23,37 +24,67 @@ public final class SimulatedSampler: ThroughputSampling {
                 return
             }
 
-            let task = Task {
-                var rng = SystemRandomNumberGenerator()
-                var downloadMbps = ScenarioWalk.initialDownloadMbps(scenario)
-                var tickIndex = 0
-
-                while !Task.isCancelled {
-                    try? await ContinuousClock().sleep(for: Self.chunkInterval)
-                    guard !Task.isCancelled else {
-                        break
-                    }
-
-                    if tickIndex.isMultiple(of: Self.downloadWalkEveryNTicks) {
-                        downloadMbps = ScenarioWalk.nextDownloadMbps(
-                            previous: downloadMbps, scenario: scenario, using: &rng
-                        )
-                    }
-
-                    continuation.yield(Self.downloadChunkSample(mbps: downloadMbps))
-
-                    if tickIndex.isMultiple(of: Self.uploadEveryNTicks) {
-                        let uploadMbps = ScenarioWalk.uploadMbps(forDownload: downloadMbps, using: &rng)
-                        continuation.yield(Self.uploadSample(mbps: uploadMbps))
-                    }
-
-                    tickIndex += 1
-                }
+            let downloadTask = Task {
+                await runDownloadStream(scenario: scenario, continuation: continuation)
+            }
+            let uploadTask = Task {
+                await runPeriodicUploadBursts(scenario: scenario, continuation: continuation)
             }
 
             continuation.onTermination = { _ in
-                task.cancel()
+                downloadTask.cancel()
+                uploadTask.cancel()
             }
+        }
+    }
+
+    private func runDownloadStream(
+        scenario: SimulationScenario,
+        continuation: AsyncStream<ThroughputSample>.Continuation
+    ) async {
+        var rng = SystemRandomNumberGenerator()
+        var downloadMbps = ScenarioWalk.initialDownloadMbps(scenario)
+        var tickIndex = 0
+
+        while !Task.isCancelled {
+            try? await ContinuousClock().sleep(for: Self.chunkInterval)
+            guard !Task.isCancelled else {
+                break
+            }
+
+            if tickIndex.isMultiple(of: Self.downloadWalkEveryNTicks) {
+                downloadMbps = ScenarioWalk.nextDownloadMbps(
+                    previous: downloadMbps, scenario: scenario, using: &rng
+                )
+            }
+
+            continuation.yield(Self.downloadChunkSample(mbps: downloadMbps))
+            tickIndex += 1
+        }
+    }
+
+    private func runPeriodicUploadBursts(
+        scenario: SimulationScenario,
+        continuation: AsyncStream<ThroughputSample>.Continuation
+    ) async {
+        var nextBurstAt = ContinuousClock().now
+        var rng = SystemRandomNumberGenerator()
+
+        while !Task.isCancelled {
+            let delay = nextBurstAt - ContinuousClock().now
+            if delay > .zero {
+                try? await ContinuousClock().sleep(for: delay)
+            }
+
+            guard !Task.isCancelled else {
+                break
+            }
+
+            var downloadMbps = ScenarioWalk.initialDownloadMbps(scenario)
+            let uploadMbps = ScenarioWalk.uploadMbps(forDownload: downloadMbps, using: &rng)
+            continuation.yield(Self.uploadSample(mbps: uploadMbps))
+
+            nextBurstAt = ContinuousClock().now.advanced(by: Self.uploadBurstInterval)
         }
     }
 

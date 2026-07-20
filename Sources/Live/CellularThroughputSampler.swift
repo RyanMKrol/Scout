@@ -5,19 +5,24 @@ import Network
 /// public API that can pin an interface) and runs ONE continuous, unbounded download stream against
 /// Cloudflare's speed endpoint — emitting a `ThroughputSample` per received chunk so a rolling window
 /// can compute a true wall-clock rate, rather than pacing discrete request/response probes with gaps
-/// between them. Upload is not sampled here (see T048). Untestable in CI/Simulator (no cellular
-/// radio) — see the worklog for what only the device gate can verify.
+/// between them. Upload is measured via periodic bursts on a separate connection (see T048) so the
+/// burst transfers don't disturb the download stream. Untestable in CI/Simulator (no cellular radio)
+/// — see the worklog for what only the device gate can verify.
 final class CellularThroughputSampler: ThroughputSampling {
     init() {}
 
     func samples() -> AsyncStream<ThroughputSample> {
         AsyncStream { continuation in
-            let task = Task {
+            let downloadTask = Task {
                 await Self.runContinuousDownloadLoop(continuation: continuation)
+            }
+            let uploadTask = Task {
+                await Self.runPeriodicUploadBursts(continuation: continuation)
             }
 
             continuation.onTermination = { _ in
-                task.cancel()
+                downloadTask.cancel()
+                uploadTask.cancel()
             }
         }
     }
@@ -90,5 +95,15 @@ final class CellularThroughputSampler: ThroughputSampling {
                 .requiredInterfaceType(.cellular)
                 .multipathServiceType(.disabled)
         )
+    }
+
+    private static func runPeriodicUploadBursts(
+        continuation: AsyncStream<ThroughputSample>.Continuation
+    ) async {
+        let burster = PeriodicUploadBurster()
+
+        for await sample in burster.samples() {
+            continuation.yield(sample)
+        }
     }
 }
