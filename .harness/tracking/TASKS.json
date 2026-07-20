@@ -1284,7 +1284,7 @@
     {
       "id": "T051",
       "title": "Honest data-use copy for the continuous-download model",
-      "status": "blocked",
+      "status": "done",
       "dependsOn": [
         "T050"
       ],
