@@ -443,4 +443,158 @@ final class SweepSessionTests: XCTestCase {
 
         session.stop()
     }
+
+    func testBackstopFiresOnDataCapCrossing() async {
+        let sampler = FakeThroughputSampler()
+        let radio = FakeRadioInfoProvider()
+        let path = FakeCellularPathMonitor()
+        let session = SweepSession(sampler: sampler, radio: radio, path: path)
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        let endedAt = ContinuousClock().now
+        // Send one sample just under the cap.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download,
+                byteCount: Int(SweepSession.backstopDataCapBytes) - 100_000,
+                transferDuration: .milliseconds(200),
+                endedAt: endedAt
+            )
+        )
+        await waitUntil { session.sessionDownloadBytes > 0 }
+
+        XCTAssertFalse(session.backstopReached)
+        XCTAssertTrue(session.isMeasuring)
+
+        // Send another sample that crosses the cap.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download,
+                byteCount: 200_000,
+                transferDuration: .milliseconds(200),
+                endedAt: endedAt.advanced(by: .milliseconds(100))
+            )
+        )
+
+        await waitUntil { session.backstopReached }
+
+        XCTAssertTrue(session.backstopReached)
+        XCTAssertFalse(session.isMeasuring)
+        XCTAssertEqual(session.sessionDownloadBytes, SweepSession.backstopDataCapBytes + 100_000)
+    }
+
+    func testBackstopFiresOnTimeCapping() async {
+        let sampler = FakeThroughputSampler()
+        let radio = FakeRadioInfoProvider()
+        let path = FakeCellularPathMonitor()
+        let clock = ManualClock()
+        let session = SweepSession(sampler: sampler, radio: radio, path: path, now: clock.now)
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        // Send a sample at the start.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 1000, transferDuration: .milliseconds(50),
+                endedAt: clock.now()
+            )
+        )
+        await waitUntil { session.sessionDownloadBytes > 0 }
+
+        XCTAssertFalse(session.backstopReached)
+        XCTAssertTrue(session.isMeasuring)
+
+        // Advance time past the cap.
+        clock.advance(by: SweepSession.backstopTimeCapDuration + .seconds(1))
+
+        // Send another sample to trigger the check.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 1000, transferDuration: .milliseconds(50),
+                endedAt: clock.now()
+            )
+        )
+
+        await waitUntil { session.backstopReached }
+
+        XCTAssertTrue(session.backstopReached)
+        XCTAssertFalse(session.isMeasuring)
+    }
+
+    func testBackstopNeverFiresWhilePaused() async {
+        let sampler = FakeThroughputSampler()
+        let radio = FakeRadioInfoProvider()
+        let path = FakeCellularPathMonitor()
+        let clock = ManualClock()
+        let session = SweepSession(sampler: sampler, radio: radio, path: path, now: clock.now)
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        // Send a sample.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 1000, transferDuration: .milliseconds(50),
+                endedAt: clock.now()
+            )
+        )
+        await waitUntil { session.sessionDownloadBytes > 0 }
+
+        // Pause the session.
+        session.pause()
+        await waitUntil { session.isPaused }
+
+        // Advance time well past the cap.
+        clock.advance(by: SweepSession.backstopTimeCapDuration + .seconds(10))
+
+        // Try to send a sample — it should not reach the subscription due to pause.
+        sampler.yield(
+            ThroughputSample(
+                direction: .download, byteCount: 1000, transferDuration: .milliseconds(50),
+                endedAt: clock.now()
+            )
+        )
+
+        // Wait a bit to ensure nothing happens.
+        try? await Task.sleep(for: .milliseconds(100))
+
+        XCTAssertFalse(session.backstopReached)
+        XCTAssertTrue(session.isMeasuring)
+        XCTAssertTrue(session.isPaused)
+
+        session.stop()
+    }
+
+    func testResetBackstopClearsCountersAndAllowsMeasuringToContinue() async {
+        let sampler = FakeThroughputSampler()
+        let clock = ManualClock()
+        let session = SweepSession(
+            sampler: sampler,
+            radio: FakeRadioInfoProvider(),
+            path: FakeCellularPathMonitor(),
+            now: clock.now
+        )
+
+        session.start()
+        await waitUntil { sampler.subscribeCount == 1 }
+
+        sampler.yield(ThroughputSample(
+            direction: .download,
+            byteCount: Int(SweepSession.backstopDataCapBytes),
+            transferDuration: .milliseconds(100),
+            endedAt: clock.now()
+        ))
+        await waitUntil { session.backstopReached }
+
+        XCTAssertTrue(session.backstopReached)
+        XCTAssertFalse(session.isMeasuring)
+        XCTAssertEqual(session.sessionDownloadBytes, SweepSession.backstopDataCapBytes)
+        session.resetBackstop()
+        XCTAssertFalse(session.backstopReached)
+        XCTAssertEqual(session.sessionDownloadBytes, 0)
+        XCTAssertEqual(session.sessionUploadBytes, 0)
+    }
 }

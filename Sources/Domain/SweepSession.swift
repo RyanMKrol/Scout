@@ -13,6 +13,10 @@ public final class SweepSession {
     /// The displayed reading's refresh cadence, decoupled from probe completion: ~4Hz per the
     /// design spec. Sourced from `ScoutMotion.tickInterval` so the two stay in lockstep.
     private nonisolated static let tickInterval: Duration = .seconds(ScoutMotion.tickInterval)
+    /// Data cap before auto-stop: ~500 MB.
+    public nonisolated static let backstopDataCapBytes: Int64 = 500 * 1024 * 1024
+    /// Time cap before auto-stop: ~5 minutes.
+    public nonisolated static let backstopTimeCapDuration: Duration = .seconds(5 * 60)
 
     private let sampler: any ThroughputSampling
     private let radio: any RadioInfoProviding
@@ -29,6 +33,7 @@ public final class SweepSession {
     public private(set) var isMeasuring: Bool = false
     public private(set) var isStalled: Bool = false
     public private(set) var isPaused: Bool = false
+    public private(set) var backstopReached: Bool = false
 
     private var downloadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
     private var uploadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
@@ -36,6 +41,7 @@ public final class SweepSession {
     private var lastSampleAt: ContinuousClock.Instant?
     private var downloadMbpsAtLastSample: Double = 0
     private var uploadMbpsAtLastSample: Double = 0
+    private var sessionStartTime: ContinuousClock.Instant?
 
     private var sampleTask: Task<Void, Never>?
     private var radioTask: Task<Void, Never>?
@@ -60,6 +66,8 @@ public final class SweepSession {
             return
         }
         isMeasuring = true
+        backstopReached = false
+        sessionStartTime = now()
 
         if cellularAvailable {
             subscribeToSamples()
@@ -123,7 +131,20 @@ public final class SweepSession {
         isMeasuring = false
         isStalled = false
         isPaused = false
+        backstopReached = false
         lastSampleAt = nil
+        sessionStartTime = nil
+    }
+
+    /// Resets the backstop counters and resumes measuring without disrupting the measuring state.
+    public func resetBackstop() {
+        backstopReached = false
+        sessionDownloadBytes = 0
+        sessionUploadBytes = 0
+        sessionStartTime = now()
+        downloadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
+        uploadWindow = ThroughputWindow(window: ThroughputWindow.liveWindow)
+        lastSampleAt = now()
     }
 
     /// Suspends sample consumption without stopping the session: the sampler subscription is
@@ -224,6 +245,27 @@ public final class SweepSession {
         lastSampleAt = now()
         downloadMbpsAtLastSample = downloadMbps
         uploadMbpsAtLastSample = uploadMbps
+
+        checkBackstop()
+    }
+
+    private func checkBackstop() {
+        guard isMeasuring, !isPaused, !backstopReached else {
+            return
+        }
+
+        let totalBytes = sessionDownloadBytes + sessionUploadBytes
+        if totalBytes >= Self.backstopDataCapBytes {
+            stop()
+            backstopReached = true
+            return
+        }
+
+        if let sessionStartTime, now() - sessionStartTime >= Self.backstopTimeCapDuration {
+            stop()
+            backstopReached = true
+            return
+        }
     }
 
     /// Recomputes the rolling-window Mbps and republishes it, independent of probe arrival, so

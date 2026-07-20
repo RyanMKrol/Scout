@@ -16,6 +16,10 @@ struct MeasuringView: View {
             } else {
                 pausedContent()
             }
+
+            if session.backstopReached {
+                backstopWarning()
+            }
         }
     }
 
@@ -303,6 +307,78 @@ struct MeasuringView: View {
         } else {
             "Sweeping is off. Scout only measures cellular data when you choose. " +
                 "Start sweeping to measure this spot."
+        }
+    }
+
+    private func backstopWarning() -> some View {
+        VStack(spacing: 16) {
+            VStack(spacing: 20) {
+                backstopWarningHeader()
+                backstopWarningButtons()
+            }
+            .frame(maxWidth: 280)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(ScoutTheme.background.opacity(0.98))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("backstop.warning")
+    }
+
+    private func backstopWarningHeader() -> some View {
+        VStack(spacing: 12) {
+            Image(systemName: "exclamationmark.circle.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(ScoutTheme.white(0.9))
+
+            Text("Data cap reached")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(ScoutTheme.white(0.9))
+                .accessibilityIdentifier("backstop.title")
+
+            Text(
+                "Scout auto-stopped to protect your data use. You can continue sweeping with a fresh allowance."
+            )
+            .font(.system(size: 15))
+            .foregroundStyle(ScoutTheme.white(0.7))
+            .multilineTextAlignment(.center)
+            .accessibilityIdentifier("backstop.message")
+        }
+    }
+
+    private func backstopWarningButtons() -> some View {
+        VStack(spacing: 12) {
+            Button(
+                action: {
+                    session.resetBackstop()
+                    session.start()
+                },
+                label: {
+                    Text("Continue sweeping")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(ScoutTheme.onAccent)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(ScoutTheme.great)
+                        .cornerRadius(14)
+                }
+            )
+            .accessibilityIdentifier("backstop.continueButton")
+
+            Button(
+                action: {
+                    session.stop()
+                },
+                label: {
+                    Text("Stop")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(ScoutTheme.white(0.8))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(ScoutTheme.white(0.12))
+                        .cornerRadius(14)
+                }
+            )
+            .accessibilityIdentifier("backstop.dismissButton")
         }
     }
 }
